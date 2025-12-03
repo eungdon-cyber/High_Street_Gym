@@ -20,6 +20,11 @@ export class APIUserController {
             APIAuthenticationController.restrict("any"),
             this.updateAuthenticatedUser
         );
+        this.routes.patch(
+            "/self",
+            APIAuthenticationController.restrict("any"),
+            this.updateAuthenticatedUser
+        );
     }
 
     /**
@@ -131,6 +136,29 @@ export class APIUserController {
      *     summary: "Update current authenticated user details"
      *     tags: [Users]
      *     description: "Update personal details (first name, last name, and optionally password) for the authenticated user. Email cannot be changed - users must register a new account or contact an admin. Note: Replace example values with your actual current or new values. Only include fields you want to update (partial updates are supported). IMPORTANT: Ensure valid JSON format - no trailing commas. Examples: {\"firstName\": \"John\"} or {\"firstName\": \"John\", \"lastName\": \"Doe\"}"
+     *     security:
+     *       - apiKey: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             $ref: '#/components/schemas/UpdateUserRequest'
+     *     responses:
+     *       200:
+     *         $ref: '#/components/responses/UserUpdated'
+     *       400:
+     *         $ref: '#/components/responses/BadRequest'
+     *       401:
+     *         $ref: '#/components/responses/Unauthorized'
+     *       404:
+     *         $ref: '#/components/responses/NotFound'
+     *       500:
+     *         $ref: '#/components/responses/InternalServerError'
+     *   patch:
+     *     summary: "Partially update current authenticated user details"
+     *     tags: [Users]
+     *     description: "Partially update personal details (first name, last name, and optionally password) for the authenticated user. Email cannot be changed - users must register a new account or contact an admin. Only include fields you want to update. IMPORTANT: Ensure valid JSON format - no trailing commas. Examples: {\"firstName\": \"John\"} or {\"firstName\": \"John\", \"lastName\": \"Doe\"}"
      *     security:
      *       - apiKey: []
      *     requestBody:
