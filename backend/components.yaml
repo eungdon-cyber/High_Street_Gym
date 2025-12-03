@@ -1,0 +1,455 @@
+components:
+  schemas:
+    Blog:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the blog post
+          example: 1
+        title:
+          type: string
+          description: The title of the blog post
+          example: "Welcome to High Street Gym"
+        content:
+          type: string
+          description: The content of the blog post
+          example: "We are excited to announce our new facilities and classes."
+        authorId:
+          type: number
+          description: The ID of the author who created the blog post
+          example: 1
+        createdAt:
+          type: string
+          description: The creation timestamp in MySQL datetime format (YYYY-MM-DD HH:mm:ss)
+          example: "2025-11-01 13:10:43"
+        deleted:
+          type: number
+          description: Deletion status (0 = active, 1 = deleted)
+          example: 0
+    BlogInput:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+          description: The title of the blog post
+          example: "My First Blog Post"
+        content:
+          type: string
+          description: The content of the blog post
+          example: "This is the content of my blog post."
+      example:
+        title: "Welcome to High Street Gym"
+        content: "We are excited to announce our new facilities and classes. Join us for an amazing fitness journey!"
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: "An error occurred"
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - firstName
+        - lastName
+        - role
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the user
+          example: 1
+        email:
+          type: string
+          description: User email address
+          example: "admin1@hsg.com"
+        firstName:
+          type: string
+          description: User's first name
+          example: "Joe"
+        lastName:
+          type: string
+          description: User's last name
+          example: "Smith"
+        role:
+          type: string
+          description: User role
+          example: "admin"
+          enum: ["admin", "trainer", "member"]
+    UserSelf:
+      type: object
+      description: User information returned to the authenticated user
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the user
+          example: 1
+        email:
+          type: string
+          description: User email address
+          example: "admin1@hsg.com"
+        firstName:
+          type: string
+          description: User's first name
+          example: "Joe"
+        lastName:
+          type: string
+          description: User's last name
+          example: "Smith"
+        role:
+          type: string
+          description: User role
+          example: "admin"
+          enum: ["admin", "trainer", "member"]
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: User email address
+          example: "admin1@hsg.com"
+        password:
+          type: string
+          format: password
+          description: User password
+          example: "0000"
+    LoginResponse:
+      type: object
+      required:
+        - key
+        - user
+      properties:
+        key:
+          type: string
+          format: uuid
+          description: API authentication key
+          example: "700ce45b-555d-4e3a-b73c-92f945075cbc"
+        user:
+          type: object
+          properties:
+            id:
+              type: number
+              example: 1
+            email:
+              type: string
+              example: "admin1@hsg.com"
+            firstName:
+              type: string
+              example: "Joe"
+            lastName:
+              type: string
+              example: "Smith"
+            role:
+              type: string
+              example: "admin"
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          description: User email address
+          example: "newuser@hsg.com"
+        password:
+          type: string
+          format: password
+          description: User password
+          example: "password123"
+        firstName:
+          type: string
+          description: User's first name
+          example: "John"
+        lastName:
+          type: string
+          description: User's last name
+          example: "Doe"
+      example:
+        email: "newuser@hsg.com"
+        password: "password123"
+        firstName: "John"
+        lastName: "Doe"
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: "User registered successfully"
+        user:
+          type: object
+          properties:
+            id:
+              type: number
+              description: The unique identifier of the user
+              example: 1
+            email:
+              type: string
+              description: User email address
+              example: "newuser@hsg.com"
+            firstName:
+              type: string
+              description: User's first name
+              example: "John"
+            lastName:
+              type: string
+              description: User's last name
+              example: "Doe"
+            role:
+              type: string
+              description: User role
+              example: "member"
+              enum: ["admin", "trainer", "member"]
+    UpdateUserRequest:
+      type: object
+      description: "Only include fields you want to update. Replace example values with your actual values. Call GET /users/self first to see your current information. IMPORTANT: Remove trailing commas when editing JSON. Valid JSON example: {\"firstName\": \"John\"} or {\"firstName\": \"John\", \"lastName\": \"Doe\"}"
+      properties:
+        firstName:
+          type: string
+          description: Your first name (use your current value if not changing, or new value if updating)
+          example: "YourFirstName"
+        lastName:
+          type: string
+          description: Your last name (use your current value if not changing, or new value if updating)
+          example: "YourLastName"
+        password:
+          type: string
+          format: password
+          description: New password (only include this field if you want to change your password)
+          example: "YourNewPassword123"
+      example:
+        firstName: "YourFirstName"
+        lastName: "YourLastName"
+        password: "YourNewPassword123"
+    Session:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the session
+          example: 1
+        activityId:
+          type: number
+          description: The ID of the activity associated with the session
+          example: 1
+        trainerId:
+          type: number
+          description: The ID of the trainer leading the session
+          example: 2
+        locationId:
+          type: number
+          description: The ID of the location where the session is held
+          example: 3
+        sessionDate:
+          type: string
+          format: date
+          description: The date of the session (YYYY-MM-DD)
+          example: "2025-11-01"
+        sessionTime:
+          type: string
+          description: The time of the session (HH:MM:SS)
+          example: "10:00:00"
+        deleted:
+          type: number
+          description: Deletion status (0 = active, 1 = deleted)
+          example: 0
+    SessionInput:
+      type: object
+      required:
+        - activityId
+        - locationId
+        - sessionDate
+        - sessionTime
+      properties:
+        activityId:
+          type: number
+          description: The ID of the activity associated with the session
+          example: 1
+        locationId:
+          type: number
+          description: The ID of the location where the session is held
+          example: 3
+        sessionDate:
+          type: string
+          format: date
+          description: The date of the session (YYYY-MM-DD)
+          example: "2025-11-01"
+        sessionTime:
+          type: string
+          description: The time of the session (HH:MM:SS)
+          example: "10:00:00"
+      example:
+        activityId: 1
+        locationId: 3
+        sessionDate: "2025-11-01"
+        sessionTime: "10:00:00"
+    Booking:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the booking
+          example: 1
+        memberId:
+          type: number
+          description: The ID of the member who made the booking
+          example: 2
+        sessionId:
+          type: number
+          description: The ID of the session being booked
+          example: 5
+        deleted:
+          type: number
+          description: Deletion status (0 = active, 1 = deleted)
+          example: 0
+    BookingInput:
+      type: object
+      required:
+        - sessionId
+      properties:
+        sessionId:
+          type: number
+          description: The ID of the session to book
+          example: 5
+      example:
+        sessionId: 5
+  responses:
+    BlogCreated:
+      description: Blog post created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Blog'
+       
+    BlogNotFound:
+      description: Blog post not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BlogsList:
+      description: List of blog posts
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Blog'
+    BlogResponse:
+      description: Single blog post
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Blog'
+    BadRequest:
+      description: Invalid request body or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict - resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: "You are already booked for this session"
+    Forbidden:
+      description: Access forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    SuccessMessage:
+      description: Success response with a message
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Success message
+                example: "Operation successful"
+    LoginSuccess:
+      description: Login successful
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginResponse'
+    UserResponse:
+      description: User information
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSelf'
+    RegisterSuccess:
+      description: User registered successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterResponse'
+    UserUpdated:
+      description: User details updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSelf'
+    SessionCreated:
+      description: Session created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Session'
+    SessionsList:
+      description: List of sessions
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Session'
+    BookingCreated:
+      description: Booking created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Booking'
+    BookingsList:
+      description: List of bookings
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Booking'

@@ -1,0 +1,181 @@
+<label for="activityName">Activity Name:</label>
+<% if (currentUser && currentUser.role === 'admin') { %>
+    <!-- Show dropdown for admin -->
+    <select name="activityId" id="activityName" required>
+        <option value="">Select Activity</option>
+        <% activities.forEach(activity => { %>
+            <option value="<%= activity.id %>" 
+                <%= selectedSession && selectedSession.activity.id === activity.id ? 'selected' : '' %>>
+                <%= activity.name %>
+            </option>
+        <% }); %>
+    </select>
+    <%- include("activity-tooltip-button", { selectedSession: selectedSession }) %>
+<% } else if (currentUser && currentUser.role === 'trainer' && (!selectedSession || selectedSession.user.id === currentUser.id)) { %>
+    <!-- Trainer creating new session or viewing their own session - editable -->
+    <select name="activityId" id="activityName" required>
+        <option value="">Select Activity</option>
+        <% activities.forEach(activity => { %>
+            <option value="<%= activity.id %>" 
+                <%= selectedSession && selectedSession.activity.id === activity.id ? 'selected' : '' %>>
+                <%= activity.name %>
+            </option>
+        <% }); %>
+    </select>
+    <%- include("activity-tooltip-button", { selectedSession: selectedSession }) %>
+<% } else { %>
+    <!-- Guest, member, or trainer viewing another trainer's session - read-only -->
+    <input 
+        type="text" 
+        value="<%= selectedSession ? selectedSession.activity.name : '' %>" 
+        disabled 
+        class="disabled-field" />
+    <%- include("activity-tooltip-button", { selectedSession: selectedSession }) %>
+<% } %>
+
+<label for="sessionDate">Date:</label>
+<% if (currentUser && currentUser.role === 'admin') { %>
+    <input 
+        type="date" 
+        name="sessionDate" 
+        id="sessionDate" 
+        value="<%= selectedSession ? selectedSession.session.sessionDate : '' %>" 
+        min="<%= new Date().toLocaleDateString('en-CA') %>"
+        required 
+        lang="en-AU" />
+<% } else if (currentUser && currentUser.role === 'trainer' && (!selectedSession || selectedSession.user.id === currentUser.id)) { %>
+    <!-- Trainer creating new session or viewing their own session - editable -->
+    <input 
+        type="date" 
+        name="sessionDate" 
+        id="sessionDate" 
+        value="<%= selectedSession ? selectedSession.session.sessionDate : '' %>" 
+        min="<%= new Date().toLocaleDateString('en-CA') %>"
+        required 
+        lang="en-AU" />
+<% } else { %>
+    <!-- Guest, member, or trainer viewing another trainer's session - read-only -->
+    <input 
+        type="text" 
+        value="<%= selectedSession ? (() => {
+            const [year, month, dayNumber] = selectedSession.session.sessionDate.split('-');
+            return `${dayNumber}/${month}/${year}`;
+        })() : '' %>" 
+        disabled 
+        class="disabled-field" />
+<% } %>
+
+<label for="sessionTime">Time:</label>
+<% if (currentUser && currentUser.role === 'admin') { %>
+    <input 
+        type="time" 
+        name="sessionTime" 
+        id="sessionTime" 
+        value="<%= selectedSession ? selectedSession.session.sessionTime : '' %>" 
+        required />
+<% } else if (currentUser && currentUser.role === 'trainer' && (!selectedSession || selectedSession.user.id === currentUser.id)) { %>
+    <!-- Trainer creating new session or viewing their own session - editable -->
+    <input 
+        type="time" 
+        name="sessionTime" 
+        id="sessionTime" 
+        value="<%= selectedSession ? selectedSession.session.sessionTime : '' %>" 
+        required />
+<% } else { %>
+    <!-- Guest, member, or trainer viewing another trainer's session - read-only -->
+    <input 
+        type="text" 
+        value="<%= selectedSession ? selectedSession.session.sessionTime : '' %>" 
+        disabled 
+        class="disabled-field" />
+<% } %>
+
+<label for="location">Location:</label>
+<% if (currentUser && currentUser.role === 'admin') { %>
+    <select name="locationId" id="location" required>
+        <option value="">Select Location</option>
+        <% locations.forEach(location => { %>
+            <option value="<%= location.id %>" 
+                <%= selectedSession && selectedSession.location.id === location.id ? 'selected' : '' %>>
+                <%= location.name %>
+            </option>
+        <% }); %>
+    </select>
+    <%- include("location-tooltip-button", { selectedSession: selectedSession }) %>
+<% } else if (currentUser && currentUser.role === 'trainer' && (!selectedSession || selectedSession.user.id === currentUser.id)) { %>
+    <!-- Trainer creating new session or viewing their own session - editable -->
+    <select name="locationId" id="location" required>
+        <option value="">Select Location</option>
+        <% locations.forEach(location => { %>
+            <option value="<%= location.id %>" 
+                <%= selectedSession && selectedSession.location.id === location.id ? 'selected' : '' %>>
+                <%= location.name %>
+            </option>
+        <% }); %>
+    </select>
+    <%- include("location-tooltip-button", { selectedSession: selectedSession }) %>
+<% } else { %>
+    <!-- Guest, member, or trainer viewing another trainer's session - read-only -->
+    <input 
+        type="text" 
+        value="<%= selectedSession ? selectedSession.location.name : '' %>" 
+        disabled 
+        class="disabled-field" />
+    <%- include("location-tooltip-button", { selectedSession: selectedSession }) %>
+<% } %>
+
+<label for="trainer">Trainer:</label>
+<% if (currentUser && currentUser.role === 'trainer') { %>
+    <!-- For Trainers, show the actual trainer for this session -->
+    <% if (selectedSession && selectedSession.user.id === currentUser.id) { %>
+        <!-- If this session belongs to the logged-in trainer, show "Self" -->
+        <input 
+            type="text" 
+            name="userId" 
+            id="trainer" 
+            value="<%= currentUser.firstName %> <%= currentUser.lastName %> (Self)" 
+            disabled 
+            class="disabled-field" />
+        <input type="hidden" name="userId" value="<%= currentUser.id %>" />
+    <% } else if (selectedSession && selectedSession.user.id !== currentUser.id) { %>
+        <!-- If this session belongs to a different trainer, show that trainer's name -->
+        <input 
+            type="text" 
+            name="userId" 
+            id="trainer" 
+            value="<%= selectedSession.user.firstName + ' ' + selectedSession.user.lastName %>" 
+            disabled 
+            class="disabled-field" />
+        <input type="hidden" name="userId" value="<%= selectedSession.user.id %>" />
+    <% } else { %>
+        <!-- If no session selected (creating new), show the logged-in trainer as "Self" -->
+        <input 
+            type="text" 
+            name="userId" 
+            id="trainer" 
+            value="<%= currentUser.firstName %> <%= currentUser.lastName %> (Self)" 
+            disabled 
+            class="disabled-field" />
+        <input type="hidden" name="userId" value="<%= currentUser.id %>" />
+    <% } %>
+<% } else { %>
+    <!-- For Admins, show all trainers -->
+    <% if (currentUser && currentUser.role === 'admin') { %>
+        <select name="userId" id="trainer" required>
+            <option value="">Select Trainer</option>
+            <% users.forEach(user => { %>
+                <option value="<%= user.id %>" 
+                    <%= selectedSession && selectedSession.user.id === user.id ? 'selected' : '' %>>
+                    <%= user.firstName %> <%= user.lastName %>
+                </option>
+            <% }); %>
+        </select>
+    <% } else { %>
+        <!-- For Guests/Members, show the trainer name as read-only -->
+        <input 
+            type="text" 
+            value="<%= selectedSession ? selectedSession.user.firstName + ' ' + selectedSession.user.lastName : '' %>" 
+            disabled 
+            class="disabled-field" />
+    <% } %>
+<% } %>

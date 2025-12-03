@@ -1,0 +1,1001 @@
+openapi: 3.0.0
+info:
+  title: High Street Gym API
+  version: 1.0.0
+  description: JSON REST API for interacting with the High Street Gym Backend
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-auth-key
+      description: API key for authentication
+  schemas:
+    Blog:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the blog post
+          example: 1
+        title:
+          type: string
+          description: The title of the blog post
+          example: Welcome to High Street Gym
+        content:
+          type: string
+          description: The content of the blog post
+          example: We are excited to announce our new facilities and classes.
+        authorId:
+          type: number
+          description: The ID of the author who created the blog post
+          example: 1
+        createdAt:
+          type: string
+          description: >-
+            The creation timestamp in MySQL datetime format (YYYY-MM-DD
+            HH:mm:ss)
+          example: '2025-11-01 13:10:43'
+        deleted:
+          type: number
+          description: Deletion status (0 = active, 1 = deleted)
+          example: 0
+    BlogInput:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        title:
+          type: string
+          description: The title of the blog post
+          example: My First Blog Post
+        content:
+          type: string
+          description: The content of the blog post
+          example: This is the content of my blog post.
+      example:
+        title: Welcome to High Street Gym
+        content: >-
+          We are excited to announce our new facilities and classes. Join us for
+          an amazing fitness journey!
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+          example: An error occurred
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - firstName
+        - lastName
+        - role
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the user
+          example: 1
+        email:
+          type: string
+          description: User email address
+          example: admin1@hsg.com
+        firstName:
+          type: string
+          description: User's first name
+          example: Joe
+        lastName:
+          type: string
+          description: User's last name
+          example: Smith
+        role:
+          type: string
+          description: User role
+          example: admin
+          enum:
+            - admin
+            - trainer
+            - member
+    UserSelf:
+      type: object
+      description: User information returned to the authenticated user
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the user
+          example: 1
+        email:
+          type: string
+          description: User email address
+          example: admin1@hsg.com
+        firstName:
+          type: string
+          description: User's first name
+          example: Joe
+        lastName:
+          type: string
+          description: User's last name
+          example: Smith
+        role:
+          type: string
+          description: User role
+          example: admin
+          enum:
+            - admin
+            - trainer
+            - member
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          description: User email address
+          example: admin1@hsg.com
+        password:
+          type: string
+          format: password
+          description: User password
+          example: '0000'
+    LoginResponse:
+      type: object
+      required:
+        - key
+        - user
+      properties:
+        key:
+          type: string
+          format: uuid
+          description: API authentication key
+          example: 700ce45b-555d-4e3a-b73c-92f945075cbc
+        user:
+          type: object
+          properties:
+            id:
+              type: number
+              example: 1
+            email:
+              type: string
+              example: admin1@hsg.com
+            firstName:
+              type: string
+              example: Joe
+            lastName:
+              type: string
+              example: Smith
+            role:
+              type: string
+              example: admin
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          description: User email address
+          example: newuser@hsg.com
+        password:
+          type: string
+          format: password
+          description: User password
+          example: password123
+        firstName:
+          type: string
+          description: User's first name
+          example: John
+        lastName:
+          type: string
+          description: User's last name
+          example: Doe
+      example:
+        email: newuser@hsg.com
+        password: password123
+        firstName: John
+        lastName: Doe
+    RegisterResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+          example: User registered successfully
+        user:
+          type: object
+          properties:
+            id:
+              type: number
+              description: The unique identifier of the user
+              example: 1
+            email:
+              type: string
+              description: User email address
+              example: newuser@hsg.com
+            firstName:
+              type: string
+              description: User's first name
+              example: John
+            lastName:
+              type: string
+              description: User's last name
+              example: Doe
+            role:
+              type: string
+              description: User role
+              example: member
+              enum:
+                - admin
+                - trainer
+                - member
+    UpdateUserRequest:
+      type: object
+      description: >-
+        Only include fields you want to update. Replace example values with your
+        actual values. Call GET /users/self first to see your current
+        information. IMPORTANT: Remove trailing commas when editing JSON. Valid
+        JSON example: {"firstName": "John"} or {"firstName": "John", "lastName":
+        "Doe"}
+      properties:
+        firstName:
+          type: string
+          description: >-
+            Your first name (use your current value if not changing, or new
+            value if updating)
+          example: YourFirstName
+        lastName:
+          type: string
+          description: >-
+            Your last name (use your current value if not changing, or new value
+            if updating)
+          example: YourLastName
+        password:
+          type: string
+          format: password
+          description: >-
+            New password (only include this field if you want to change your
+            password)
+          example: YourNewPassword123
+      example:
+        firstName: YourFirstName
+        lastName: YourLastName
+        password: YourNewPassword123
+    Session:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the session
+          example: 1
+        activityId:
+          type: number
+          description: The ID of the activity associated with the session
+          example: 1
+        trainerId:
+          type: number
+          description: The ID of the trainer leading the session
+          example: 2
+        locationId:
+          type: number
+          description: The ID of the location where the session is held
+          example: 3
+        sessionDate:
+          type: string
+          format: date
+          description: The date of the session (YYYY-MM-DD)
+          example: '2025-11-01'
+        sessionTime:
+          type: string
+          description: The time of the session (HH:MM:SS)
+          example: '10:00:00'
+        deleted:
+          type: number
+          description: Deletion status (0 = active, 1 = deleted)
+          example: 0
+    SessionInput:
+      type: object
+      required:
+        - activityId
+        - locationId
+        - sessionDate
+        - sessionTime
+      properties:
+        activityId:
+          type: number
+          description: The ID of the activity associated with the session
+          example: 1
+        locationId:
+          type: number
+          description: The ID of the location where the session is held
+          example: 3
+        sessionDate:
+          type: string
+          format: date
+          description: The date of the session (YYYY-MM-DD)
+          example: '2025-11-01'
+        sessionTime:
+          type: string
+          description: The time of the session (HH:MM:SS)
+          example: '10:00:00'
+      example:
+        activityId: 1
+        locationId: 3
+        sessionDate: '2025-11-01'
+        sessionTime: '10:00:00'
+    Booking:
+      type: object
+      properties:
+        id:
+          type: number
+          description: The unique identifier of the booking
+          example: 1
+        memberId:
+          type: number
+          description: The ID of the member who made the booking
+          example: 2
+        sessionId:
+          type: number
+          description: The ID of the session being booked
+          example: 5
+        deleted:
+          type: number
+          description: Deletion status (0 = active, 1 = deleted)
+          example: 0
+    BookingInput:
+      type: object
+      required:
+        - sessionId
+      properties:
+        sessionId:
+          type: number
+          description: The ID of the session to book
+          example: 5
+      example:
+        sessionId: 5
+  responses:
+    BlogCreated:
+      description: Blog post created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Blog'
+    BlogNotFound:
+      description: Blog post not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BlogsList:
+      description: List of blog posts
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Blog'
+    BlogResponse:
+      description: Single blog post
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Blog'
+    BadRequest:
+      description: Invalid request body or bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Authentication required or invalid credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: Conflict - resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: You are already booked for this session
+    Forbidden:
+      description: Access forbidden - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    SuccessMessage:
+      description: Success response with a message
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Success message
+                example: Operation successful
+    LoginSuccess:
+      description: Login successful
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginResponse'
+    UserResponse:
+      description: User information
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSelf'
+    RegisterSuccess:
+      description: User registered successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterResponse'
+    UserUpdated:
+      description: User details updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSelf'
+    SessionCreated:
+      description: Session created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Session'
+    SessionsList:
+      description: List of sessions
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Session'
+    BookingCreated:
+      description: Booking created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Booking'
+    BookingsList:
+      description: List of bookings
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Booking'
+paths:
+  /login:
+    post:
+      summary: Authenticate user and get API key
+      tags:
+        - Authentication
+      description: >-
+        Login with email and password to receive an API key for authenticated
+        requests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /logout:
+    delete:
+      summary: Deauthenticate user
+      tags:
+        - Authentication
+      description: Invalidate the current API authentication key
+      security:
+        - apiKey: []
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /blogs:
+    get:
+      summary: Get all blog posts
+      tags:
+        - Blogs
+      description: Retrieve a list of all blog posts
+      parameters:
+        - name: filter
+          in: query
+          description: Search filter on blog titles and content
+          required: false
+          schema:
+            type: string
+          example: fitness
+      responses:
+        '200':
+          $ref: '#/components/responses/BlogsList'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create a new blog post
+      tags:
+        - Blogs
+      description: Create a new blog post (Authentication required)
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/BlogCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /blogs/{id}:
+    get:
+      summary: Get a blog post by ID
+      tags:
+        - Blogs
+      description: Retrieve a single blog post by its ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The blog post ID
+      responses:
+        '200':
+          $ref: '#/components/responses/BlogResponse'
+        '404':
+          $ref: '#/components/responses/BlogNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete a blog post
+      tags:
+        - Blogs
+      description: Delete a blog post by ID (Authentication required)
+      security:
+        - apiKey: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The blog post ID
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/BlogNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /bookings/self:
+    get:
+      summary: Get authenticated member's bookings
+      tags:
+        - Bookings
+      description: Retrieve a list of all active bookings for the authenticated member
+      security:
+        - apiKey: []
+      parameters:
+        - in: query
+          name: includePast
+          schema:
+            type: string
+            enum:
+              - 'true'
+              - 'false'
+          description: >-
+            If 'true', includes past bookings in the results. Default is 'false'
+            (only future bookings).
+          required: false
+      responses:
+        '200':
+          $ref: '#/components/responses/BookingsList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /bookings/{id}:
+    get:
+      summary: Get a specific booking
+      tags:
+        - Bookings
+      description: >-
+        Retrieve a specific booking with full session, activity, location, and
+        trainer details. Members can only view their own bookings.
+      security:
+        - apiKey: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The booking ID
+      responses:
+        '200':
+          $ref: '#/components/responses/BookingCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Cancel a booking
+      tags:
+        - Bookings
+      description: >-
+        Cancel a booking by ID. Only the member who owns the booking can cancel
+        it.
+      security:
+        - apiKey: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The booking ID
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /bookings:
+    post:
+      summary: Create a new booking
+      tags:
+        - Bookings
+      description: >-
+        Create a booking for the authenticated member by selecting a session.
+        Members can only create bookings for themselves.
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/BookingCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /bookings/export/xml/history:
+    get:
+      summary: Export member's booking history as XML
+      tags:
+        - Bookings
+      description: >-
+        Export the authenticated member's booking history as XML for fitness
+        tracking applications. Includes activity data, session details,
+        location, and trainer information.
+      security:
+        - apiKey: []
+      parameters:
+        - in: query
+          name: onlyPast
+          schema:
+            type: string
+            enum:
+              - 'true'
+              - 'false'
+          description: >-
+            If 'true', exports only previous (past) bookings. Default is 'false'
+            (all bookings).
+          required: false
+      responses:
+        '200':
+          description: XML file containing member's booking history
+          content:
+            application/xml:
+              schema:
+                type: string
+                example: |
+                  <?xml version="1.0" encoding="UTF-8"?>
+                  <booking_history>
+                    <header>
+                      <title>Booking History - John Doe</title>
+                      <member>
+                        <name>John Doe</name>
+                        <email>member@hsg.com</email>
+                      </member>
+                    </header>
+                    <bookings>...</bookings>
+                  </booking_history>
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /docs:
+    get:
+      summary: View automatically generated API documentation
+      tags:
+        - Documentation
+      description: Returns the Swagger UI documentation interface
+      responses:
+        '200':
+          description: Swagger UI HTML documentation page
+          content:
+            text/html:
+              schema:
+                type: string
+                description: HTML page containing the interactive API documentation
+  /sessions:
+    get:
+      summary: Get all sessions
+      tags:
+        - Sessions
+      description: Retrieve a list of all active sessions, sorted by date and time
+      responses:
+        '200':
+          $ref: '#/components/responses/SessionsList'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create a new session
+      tags:
+        - Sessions
+      description: >-
+        Create a session for the authenticated trainer. Trainers can only create
+        sessions for themselves.
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        description: Session request containing activity, location, date, and time
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionInput'
+      responses:
+        '201':
+          $ref: '#/components/responses/SessionCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /sessions/self:
+    get:
+      summary: Get authenticated trainer's sessions
+      tags:
+        - Sessions
+      description: >-
+        Retrieve a list of all active sessions for the authenticated trainer,
+        sorted by date and time
+      security:
+        - apiKey: []
+      responses:
+        '200':
+          $ref: '#/components/responses/SessionsList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /sessions/{id}:
+    delete:
+      summary: Cancel a session
+      tags:
+        - Sessions
+      description: >-
+        Cancel a session by ID. Only the trainer who owns the session can cancel
+        it.
+      security:
+        - apiKey: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The session ID
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /sessions/export/xml/weekly:
+    get:
+      summary: Export trainer's weekly sessions as XML
+      tags:
+        - Sessions
+      description: >-
+        Export the authenticated trainer's sessions as XML for calendar import.
+        Supports optional date range filtering via query parameters.
+      security:
+        - apiKey: []
+      parameters:
+        - in: query
+          name: startDate
+          schema:
+            type: string
+            format: date
+          description: Start date for filtering sessions (YYYY-MM-DD format)
+        - in: query
+          name: endDate
+          schema:
+            type: string
+            format: date
+          description: End date for filtering sessions (YYYY-MM-DD format)
+      responses:
+        '200':
+          description: XML file containing trainer's weekly sessions
+          content:
+            application/xml:
+              schema:
+                type: string
+                example: |
+                  <?xml version="1.0" encoding="UTF-8"?>
+                  <calendar>
+                    <header>
+                      <title>Sessions - John Doe</title>
+                      <trainer>
+                        <name>John Doe</name>
+                        <email>trainer@hsg.com</email>
+                      </trainer>
+                    </header>
+                    <sessions>...</sessions>
+                  </calendar>
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Users
+      description: >-
+        Create a new user account with email, password, first name, and last
+        name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/RegisterSuccess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/self:
+    get:
+      summary: Get current authenticated user
+      tags:
+        - Users
+      description: Returns information about the currently authenticated user
+      security:
+        - apiKey: []
+      responses:
+        '200':
+          $ref: '#/components/responses/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      summary: Update current authenticated user details
+      tags:
+        - Users
+      description: >-
+        Update personal details (first name, last name, and optionally password)
+        for the authenticated user. Email cannot be changed - users must
+        register a new account or contact an admin. Note: Replace example values
+        with your actual current or new values. Only include fields you want to
+        update (partial updates are supported). IMPORTANT: Ensure valid JSON
+        format - no trailing commas. Examples: {"firstName": "John"} or
+        {"firstName": "John", "lastName": "Doe"}
+      security:
+        - apiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UserUpdated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+tags: []

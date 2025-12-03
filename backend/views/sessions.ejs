@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+    <head>
+        <title>High Street Gym - Sessions</title>
+        <%- include("partials/head.ejs") %>
+    </head>
+    <body>
+        <main>
+            <%- include("partials/header.ejs") %>    
+            
+            <!-- Unified Success/Warning Messages -->
+            <% if (typeof message !== 'undefined' && message) { %>
+                <div class="success-message">
+                    <% if (message === 'session_created') { %>
+                        ✅ Session successfully created!
+                    <% } else if (message === 'session_updated') { %>
+                        ✅ Session successfully updated!
+                    <% } else if (message === 'session_deleted') { %>
+                        ✅ Session successfully deleted!
+                    <% } %>
+                </div>
+            <% } else if (showWarning && warningData) { %>
+                <div class="warning-message">
+                    <div class="warning-text">
+                        ⚠️ <%= warningData.message %> Are you sure you want to proceed?
+                    </div>
+
+                    <div class="warning-actions">
+                        <form action="/sessions/<%= warningData.sessionId %>" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="acknowledgeBookingRemoval" value="true">
+                            <button type="submit" class="warning-confirm-btn">Confirm & Delete Session</button>
+                        </form>
+                        <button class="warning-cancel-btn" onclick="history.back()">Cancel</button>  
+                    </div>
+                </div>
+            <% } else if (showCaution && cautionData) { %>
+                <div class="caution-message">
+                    <div class="caution-text">
+                        ⚡ <%= cautionData.message %> Are you sure you want to proceed?
+                    </div>
+
+                    <div class="caution-actions">
+                        <form action="/sessions/<%= cautionData.sessionId %>" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="sessionDate" value="<%= cautionData.sessionDate %>">
+                            <input type="hidden" name="sessionTime" value="<%= cautionData.sessionTime %>">
+                            <input type="hidden" name="activityId" value="<%= cautionData.activityId %>">
+                            <input type="hidden" name="locationId" value="<%= cautionData.locationId %>">
+                            <input type="hidden" name="userId" value="<%= cautionData.userId %>">
+                            <input type="hidden" name="acknowledgeBookingUpdate" value="true">
+                            <button type="submit" class="caution-confirm-btn">Confirm & Update Session</button>
+                        </form>
+                        <button class="caution-cancel-btn" onclick="history.back()">Cancel</button>
+                    </div>
+                </div>
+                    <% } %>
+
+            <section class="content-layout">
+                <!-- Left side: Content List -->
+                <section class="content-left-panel">
+                    
+                    <!-- Filter Form - At top of main list -->
+                    <form method="GET" action="/sessions" class="filter-form">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label for="startDate">Start Date:</label>
+                                <input type="date" name="startDate" value="<%= startDate || '' %>" />
+                            </div>
+                            
+                            <div class="filter-group">
+                        <label for="endDate">End Date:</label>
+                        <input type="date" name="endDate" value="<%= endDate || '' %>" />
+                            </div>
+                    
+                             <div class="filter-group">
+                         <label for="trainerId">Trainer:</label>
+                         <select name="trainerId">
+                                     <option value="">All Trainers</option>
+                             <% users.forEach(user => { %>
+                                         <option value="<%= user.id %>" <%= trainerId == user.id ? 'selected' : '' %>>
+                                             <%= user.firstName %> <%= user.lastName %>
+                                 </option>
+                             <% }); %>
+                         </select>
+                             </div>
+                             
+                             <div class="filter-group">
+                                 <label for="activityId">Activity:</label>
+                                 <select name="activityId">
+                                     <option value="">All Activities</option>
+                                     <% activities.forEach(activity => { %>
+                                         <option value="<%= activity.id %>" <%= activityId == activity.id ? 'selected' : '' %>>
+                                             <%= activity.name %>
+                                         </option>
+                                     <% }); %>
+                                 </select>
+                             </div>
+                             
+                             <div class="filter-group">
+                                 <label for="locationId">Location:</label>
+                                 <select name="locationId">
+                                     <option value="">All Locations</option>
+                                     <% locations.forEach(location => { %>
+                                         <option value="<%= location.id %>" <%= locationId == location.id ? 'selected' : '' %>>
+                                             <%= location.name %>
+                                         </option>
+                                     <% }); %>
+                                 </select>
+                             </div>
+                            
+                            <button type="submit">Search</button>
+                            
+                            <!-- "My Sessions" Toggle Button for Trainers -->
+                            <% if (currentUser && currentUser.role === "trainer") { %>
+                                <button type="button" onclick="toggleMySessions()" class="my-sessions-btn <%= trainerId == currentUser.id ? 'active' : '' %>">
+                                    <%= trainerId == currentUser.id ? 'All Sessions' : 'My Sessions' %>
+                                </button>
+                                <!-- XML Export Button for Trainers -->
+                                <button type="button" onclick="exportSessionsXML()" class="my-sessions-btn" style="background-color: #28a745;">
+                                    📅 Export XML
+                                </button>
+                            <% } %>
+                        </div>
+                    </form>
+
+                    <!-- Unified Management Section (Mobile) - Moved to top -->
+                    <div class="unified-management-section" id="management-form">
+                        <!-- Session Management Form -->
+                        <form 
+                            action="/sessions<%= selectedSession ? '/' + selectedSession.session.id : '' %>" 
+                            method="post" 
+                            class="form-grid">
+
+                         <!-- Preserve filter parameters -->
+                         <input type="hidden" name="startDate" value="<%= startDate || '' %>">
+                         <input type="hidden" name="endDate" value="<%= endDate || '' %>">
+                         <input type="hidden" name="trainerId" value="<%= trainerId || '' %>">
+                         <input type="hidden" name="activityId" value="<%= activityId || '' %>">
+                         <input type="hidden" name="locationId" value="<%= locationId || '' %>">
+
+                            <%- include("partials/session-form-fields", {
+                                selectedSession: selectedSession,
+                                activities: activities,
+                                locations: locations,
+                                users: users,
+                                currentUser: currentUser
+                            }) %>
+
+                            <%- include("partials/session-admin-buttons", {
+                                selectedSession: selectedSession
+                            }) %>
+                        </form>
+                    </div>
+
+                    <!-- Navigation Buttons (Mobile Only) -->
+                    <div class="mobile-nav-buttons">
+                    <button type="button" onclick="scrollToTop()" class="back-btn two-col">
+                            ← Back to Session
+                        </button>
+                </div>
+
+                    <!-- New Layout: Month/Year Title with Date/Day and Entries -->
+                    <% Object.keys(groupedSessions).forEach(yearMonth => { %>
+                        <!-- Month/Year Title - Show once per month -->
+                        <div class="month-year-header sticky-header">
+                            <h3 class="month-year-title">
+                                <% 
+                                const [year, month] = yearMonth.split('-');
+                                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                                   'July', 'August', 'September', 'October', 'November', 'December'];
+                                const monthName = monthNames[parseInt(month) - 1];
+                                const headerTitle = (currentUser && currentUser.role === 'trainer' && trainerId == currentUser.id) 
+                                    ? 'My Sessions' 
+                                    : (trainerId && users.find(user => user.id == trainerId)) 
+                                        ? 'Sessions by ' + (users.find(user => user.id == trainerId).firstName + ' ' + users.find(user => user.id == trainerId).lastName)
+                                        : 'All Sessions';
+                                %>
+                                <%= headerTitle %> - <%= monthName %> <%= year %>
+                            </h3>
+                        </div>
+                        
+                        <!-- Date/Day and Entries Layout -->
+                        <div class="sessions-layout">
+                            <% Object.keys(groupedSessions[yearMonth]).forEach(day => { %>
+                                <% 
+                                const dayDate = day.split(' - ')[0];
+                                const dayName = day.split(' - ')[1];
+                                
+                                // Convert YYYY-MM-DD to DD/MM format for Australian style
+                                const [year, month, dayNumber] = dayDate.split('-');
+                                const australianDate = `${dayNumber}/${month}`;
+                                
+                                // Convert day name to 3-letter format (title case)
+                                const dayAbbreviation = dayName.substring(0, 3);
+                                
+                                const sessions = groupedSessions[yearMonth][day];
+                                %>
+                                <div class="day-row">
+                                    <!-- Left Column: Date/Day -->
+                                    <div class="date-day-column">
+                                        <div class="date-day-info">
+                                            <div class="day-date"><%= australianDate %></div>
+                                            <div class="day-name"><%= dayAbbreviation %></div>                                          
+                                            
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right Column: Session Entries -->
+                                    <div class="sessions-column">
+                                        <% 
+                                        // Group sessions by activity name for this day
+                                        const activityGroups = {};
+                                        sessions.forEach(sessionItem => {
+                                            const activityName = sessionItem.activity.name;
+                                            if (!activityGroups[activityName]) {
+                                                activityGroups[activityName] = [];
+                                            }
+                                            activityGroups[activityName].push(sessionItem);
+                                        });
+                                        
+                                        // Display each unique activity once per day
+                                        Object.keys(activityGroups).forEach(activityName => {
+                                            const sessionsForActivity = activityGroups[activityName];
+                                            const firstSession = sessionsForActivity[0];
+                                            const sessionCount = sessionsForActivity.length;
+                                            const isSelected = selectedSession && sessionsForActivity.some(s => s.session.id === selectedSession.session.id);
+                                            
+                                            // Get unique times, locations, and trainers for this activity
+                                            const uniqueTimes = [...new Set(sessionsForActivity.map(s => s.session.sessionTime))].sort();
+                                            const uniqueLocations = [...new Map(sessionsForActivity.map(s => [s.location.id, s.location.name])).entries()];
+                                            const uniqueTrainers = [...new Map(sessionsForActivity.map(s => [s.user.id, s.user.firstName + ' ' + s.user.lastName])).entries()];
+                                        %>
+                                            <div class="session-entry <%= isSelected ? 'selected' : '' %>" 
+                                                 data-activity-name="<%= activityName %>"
+                                                 data-session-count="<%= sessionCount %>"
+                                                 data-sessions='<%= JSON.stringify(sessionsForActivity.map(s => ({
+                                                     id: s.session.id,
+                                                     time: s.session.sessionTime,
+                                                     locationId: s.location.id,
+                                                     locationName: s.location.name,
+                                                     trainerId: s.user.id,
+                                                     trainerName: s.user.firstName + ' ' + s.user.lastName
+                                                 }))) %>'>
+                                                <span class="session-time" style="visibility: hidden;">
+                                                    <!-- Empty time slot to maintain grid layout -->
+                                                </span>
+                                                <div style="display: flex; flex-direction: column; flex: 1;">
+                                                    <span class="session-activity">
+                                                        <%= activityName %>
+                                                    </span>
+                                                    <% if (sessionCount > 1) { %>
+                                                        <span class="session-count-text" style="font-size: 0.75em; color: rgba(0, 0, 0, 0.6); margin-top: 4px;">
+                                                            <%= sessionCount %> sessions available
+                                                        </span>
+                                                        <!-- Progressive Selection (hidden initially) -->
+                                                        <div class="progressive-selection" style="display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
+                                                            <div class="selection-step" data-step="time" style="margin-bottom: 8px;">
+                                                                <label style="font-size: 0.85em; color: rgba(0, 0, 0, 0.7); display: block; margin-bottom: 4px;">Select Time:</label>
+                                                                <select class="time-select" style="width: 100%; padding: 4px; font-size: 0.9em;">
+                                                                    <option value="">Choose time...</option>
+                                                                    <% uniqueTimes.forEach(time => { %>
+                                                                        <option value="<%= time %>"><%= time.substring(0, 5) %></option>
+                                                                    <% }); %>
+                                                                </select>
+                                                            </div>
+                                                            <div class="selection-step" data-step="location" style="display: none; margin-bottom: 8px;">
+                                                                <label style="font-size: 0.85em; color: rgba(0, 0, 0, 0.7); display: block; margin-bottom: 4px;">Select Location:</label>
+                                                                <select class="location-select" style="width: 100%; padding: 4px; font-size: 0.9em;">
+                                                                    <option value="">Choose location...</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="selection-step" data-step="trainer" style="display: none; margin-bottom: 8px;">
+                                                                <label style="font-size: 0.85em; color: rgba(0, 0, 0, 0.7); display: block; margin-bottom: 4px;">Select Trainer:</label>
+                                                                <select class="trainer-select" style="width: 100%; padding: 4px; font-size: 0.9em;">
+                                                                    <option value="">Choose trainer...</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    <% } %>
+                                                </div>
+                                                <div class="session-actions">
+                                                    <% if (sessionCount === 1) { %>
+                                                        <a href="/sessions/<%= firstSession.session.id %><%= startDate ? '?startDate=' + startDate : '' %><%= endDate ? (startDate ? '&' : '?') + 'endDate=' + endDate : '' %><%= trainerId ? (startDate || endDate ? '&' : '?') + 'trainerId=' + trainerId : '' %><%= activityId ? (startDate || endDate || trainerId ? '&' : '?') + 'activityId=' + activityId : '' %><%= locationId ? (startDate || endDate || trainerId || activityId ? '&' : '?') + 'locationId=' + locationId : '' %>" 
+                                                            class="link-button <%= isSelected ? 'selected-link' : '' %>">
+                                                             View Details
+                                                         </a>
+                                                    <% } else { %>
+                                                        <a href="#" class="link-button show-selection" style="display: inline-block;">
+                                                             Select Session
+                                                         </a>
+                                                         <a href="#" class="link-button view-details-link" style="display: none;">
+                                                             View Details
+                                                         </a>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                </div>
+                            <% }); %>
+                    </div>
+                    <% }); %>
+
+                    </div>
+                    </section>
+
+                <!-- Right side: Content Management Forms (Desktop) -->
+                <section class="content-right-panel">
+                    <!-- Session Management Form -->
+                    <form 
+                        action="/sessions<%= selectedSession ? '/' + selectedSession.session.id : '' %>" 
+                        method="post" 
+                        class="form-grid">
+
+                         <!-- Preserve filter parameters -->
+                         <input type="hidden" name="startDate" value="<%= startDate || '' %>">
+                         <input type="hidden" name="endDate" value="<%= endDate || '' %>">
+                         <input type="hidden" name="trainerId" value="<%= trainerId || '' %>">
+                         <input type="hidden" name="activityId" value="<%= activityId || '' %>">
+                         <input type="hidden" name="locationId" value="<%= locationId || '' %>">
+
+                        <%- include("partials/session-form-fields", {
+                            selectedSession: selectedSession,
+                            activities: activities,
+                            locations: locations,
+                            users: users,
+                            currentUser: currentUser
+                        }) %>
+
+                        <%- include("partials/session-admin-buttons", {
+                            selectedSession: selectedSession
+                        }) %>
+                    </form>
+                </section>  
+            </section>
+
+            <%- include("partials/footer.ejs") %>
+        </main>
+
+            <script type="application/json" id="activities-data"><%- JSON.stringify(activities) %></script>
+            <script type="application/json" id="locations-data"><%- JSON.stringify(locations) %></script>
+            <script>
+            // Make activities data available to JavaScript
+            window.activities = JSON.parse(document.getElementById('activities-data').textContent);
+            window.locations = JSON.parse(document.getElementById('locations-data').textContent);
+            
+            // Scroll selected session into view when page loads
+            document.addEventListener('DOMContentLoaded', function() {
+                const selectedEntry = document.querySelector('.session-entry.selected');
+                // Page-specific scroll logic removed - now handled globally in header.ejs
+
+                // Auto-scroll functionality is now handled globally in header.ejs
+            });
+
+            // Auto-scroll functionality is now handled globally in header.ejs
+
+            // Progressive Selection for Multiple Sessions
+            document.addEventListener('DOMContentLoaded', function() {
+                // Handle "Select Session" button clicks
+                document.querySelectorAll('.show-selection').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const sessionEntry = this.closest('.session-entry');
+                        const progressiveSelection = sessionEntry.querySelector('.progressive-selection');
+                        const timeStep = sessionEntry.querySelector('.selection-step[data-step="time"]');
+                        
+                        // Show progressive selection and time step
+                        progressiveSelection.style.display = 'block';
+                        timeStep.style.display = 'block';
+                        this.style.display = 'none';
+                    });
+                });
+
+                // Handle time selection
+                document.querySelectorAll('.time-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const sessionEntry = this.closest('.session-entry');
+                        const sessions = JSON.parse(sessionEntry.getAttribute('data-sessions'));
+                        const selectedTime = this.value;
+                        const locationStep = sessionEntry.querySelector('.selection-step[data-step="location"]');
+                        const trainerStep = sessionEntry.querySelector('.selection-step[data-step="trainer"]');
+                        const locationSelect = sessionEntry.querySelector('.location-select');
+                        const trainerSelect = sessionEntry.querySelector('.trainer-select');
+                        const viewDetailsLink = sessionEntry.querySelector('.view-details-link');
+                        
+                        if (!selectedTime) {
+                            locationStep.style.display = 'none';
+                            trainerStep.style.display = 'none';
+                            viewDetailsLink.style.display = 'none';
+                            return;
+                        }
+                        
+                        // Filter sessions by selected time
+                        const filteredByTime = sessions.filter(s => s.time === selectedTime);
+                        
+                        // Get unique locations for this time
+                        const locations = [...new Map(filteredByTime.map(s => [s.locationId, s.locationName])).entries()];
+                        
+                        // Populate location dropdown
+                        locationSelect.innerHTML = '<option value="">Choose location...</option>';
+                        locations.forEach(([id, name]) => {
+                            locationSelect.innerHTML += `<option value="${id}">${name}</option>`;
+                        });
+                        
+                        // Show location step
+                        locationStep.style.display = 'block';
+                        trainerStep.style.display = 'none';
+                        trainerSelect.innerHTML = '<option value="">Choose trainer...</option>';
+                        viewDetailsLink.style.display = 'none';
+                    });
+                });
+
+                // Handle location selection
+                document.querySelectorAll('.location-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const sessionEntry = this.closest('.session-entry');
+                        const sessions = JSON.parse(sessionEntry.getAttribute('data-sessions'));
+                        const timeSelect = sessionEntry.querySelector('.time-select');
+                        const selectedTime = timeSelect.value;
+                        const selectedLocationId = this.value;
+                        const trainerStep = sessionEntry.querySelector('.selection-step[data-step="trainer"]');
+                        const trainerSelect = sessionEntry.querySelector('.trainer-select');
+                        const viewDetailsLink = sessionEntry.querySelector('.view-details-link');
+                        
+                        if (!selectedLocationId) {
+                            trainerStep.style.display = 'none';
+                            viewDetailsLink.style.display = 'none';
+                            return;
+                        }
+                        
+                        // Filter sessions by time and location
+                        const filteredByTimeAndLocation = sessions.filter(s => 
+                            s.time === selectedTime && s.locationId == selectedLocationId
+                        );
+                        
+                        // Get unique trainers for this time and location
+                        const trainers = [...new Map(filteredByTimeAndLocation.map(s => [s.trainerId, s.trainerName])).entries()];
+                        
+                        // Populate trainer dropdown
+                        trainerSelect.innerHTML = '<option value="">Choose trainer...</option>';
+                        trainers.forEach(([id, name]) => {
+                            trainerSelect.innerHTML += `<option value="${id}">${name}</option>`;
+                        });
+                        
+                        // Show trainer step
+                        trainerStep.style.display = 'block';
+                        viewDetailsLink.style.display = 'none';
+                    });
+                });
+
+                // Handle trainer selection
+                document.querySelectorAll('.trainer-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const sessionEntry = this.closest('.session-entry');
+                        const sessions = JSON.parse(sessionEntry.getAttribute('data-sessions'));
+                        const timeSelect = sessionEntry.querySelector('.time-select');
+                        const locationSelect = sessionEntry.querySelector('.location-select');
+                        const selectedTime = timeSelect.value;
+                        const selectedLocationId = locationSelect.value;
+                        const selectedTrainerId = this.value;
+                        const viewDetailsLink = sessionEntry.querySelector('.view-details-link');
+                        
+                        if (!selectedTrainerId) {
+                            viewDetailsLink.style.display = 'none';
+                            return;
+                        }
+                        
+                        // Find the matching session
+                        const matchingSession = sessions.find(s => 
+                            s.time === selectedTime && 
+                            s.locationId == selectedLocationId && 
+                            s.trainerId == selectedTrainerId
+                        );
+                        
+                        if (matchingSession) {
+                            // Build URL with filter parameters
+                            const startDate = '<%= startDate || "" %>';
+                            const endDate = '<%= endDate || "" %>';
+                            const trainerId = '<%= trainerId || "" %>';
+                            const activityId = '<%= activityId || "" %>';
+                            const locationId = '<%= locationId || "" %>';
+                            
+                            let url = '/sessions/' + matchingSession.id;
+                            const params = [];
+                            if (startDate) params.push('startDate=' + startDate);
+                            if (endDate) params.push('endDate=' + endDate);
+                            if (trainerId) params.push('trainerId=' + trainerId);
+                            if (activityId) params.push('activityId=' + activityId);
+                            if (locationId) params.push('locationId=' + locationId);
+                            if (params.length > 0) url += '?' + params.join('&');
+                            
+                            viewDetailsLink.href = url;
+                            viewDetailsLink.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+             // Function to toggle between My Sessions and All Sessions
+             function toggleMySessions() {
+                 // Get the current form values
+                 const startDate = document.querySelector('input[name="startDate"]').value;
+                 const endDate = document.querySelector('input[name="endDate"]').value;
+                 const activityId = document.querySelector('select[name="activityId"]').value;
+                 const locationId = document.querySelector('select[name="locationId"]').value;
+                 const currentTrainerId = '<%= trainerId %>';
+                 const currentUserId = '<%= currentUser.id %>';
+                 
+                 // Build the URL with the form values
+                 let url = '/sessions';
+                 const params = [];
+                 
+                 // If currently showing "My Sessions", go to "All Sessions"
+                 if (currentTrainerId == currentUserId) {
+                     // Remove trainerId filter
+                     if (startDate) {
+                         params.push('startDate=' + startDate);
+                     }
+                     if (endDate) {
+                         params.push('endDate=' + endDate);
+                     }
+                     if (activityId) {
+                         params.push('activityId=' + activityId);
+                     }
+                     if (locationId) {
+                         params.push('locationId=' + locationId);
+                     }
+                 } else {
+                     // If currently showing "All Sessions", go to "My Sessions"
+                     params.push('trainerId=' + currentUserId);
+                     if (startDate) {
+                         params.push('startDate=' + startDate);
+                     }
+                     if (endDate) {
+                         params.push('endDate=' + endDate);
+                     }
+                     if (activityId) {
+                         params.push('activityId=' + activityId);
+                     }
+                     if (locationId) {
+                         params.push('locationId=' + locationId);
+                     }
+                 }
+                 
+                 if (params.length > 0) {
+                     url += '?' + params.join('&');
+                 }
+                 
+                 // Redirect to the filtered URL
+                 window.location.href = url;
+             }
+
+             // Function to export sessions XML with current form values
+             function exportSessionsXML() {
+                 // Get the current form values
+                 const startDate = document.querySelector('input[name="startDate"]').value;
+                 const endDate = document.querySelector('input[name="endDate"]').value;
+                 const activityId = document.querySelector('select[name="activityId"]').value;
+                 const locationId = document.querySelector('select[name="locationId"]').value;
+                 const trainerSelect = document.querySelector('select[name="userId"]');
+                 const trainerId = trainerSelect ? trainerSelect.value : '<%= currentUser.id %>';
+                 
+                 // Build the export URL with the form values
+                 let url = '/sessions/export/xml/weekly';
+                 const params = [];
+                 if (startDate) {
+                     params.push('startDate=' + startDate);
+                 }
+                 if (endDate) {
+                     params.push('endDate=' + endDate);
+                 }
+                 if (activityId) {
+                     params.push('activityId=' + activityId);
+                 }
+                 if (locationId) {
+                     params.push('locationId=' + locationId);
+                 }
+                 if (trainerId) {
+                     params.push('trainerId=' + trainerId);
+                 }
+                 if (params.length > 0) {
+                     url += '?' + params.join('&');
+                 }
+                 
+                 // Navigate to the export URL (will trigger download)
+                 window.location.href = url;
+             }
+
+            // Date input synchronization for admin/trainer roles
+            document.addEventListener('DOMContentLoaded', function() {
+                // Find all date inputs and display fields (there might be multiple forms)
+                const dateInputs = document.querySelectorAll('input[name="sessionDate"]');
+                const displayFields = document.querySelectorAll('#sessionDateDisplay');
+                
+                console.log('Found date inputs:', dateInputs.length);
+                console.log('Found display fields:', displayFields.length);
+                
+                // Process each pair
+                dateInputs.forEach((dateInput, index) => {
+                    const displayField = displayFields[index];
+                    
+                    if (dateInput && displayField) {
+                        console.log('Setting up sync for pair:', index);
+                        
+                        // Sync when date picker changes
+                        dateInput.addEventListener('change', function() {
+                            console.log('Date input changed:', this.value);
+                            if (this.value) {
+                                const date = new Date(this.value);
+                                const day = String(date.getDate()).padStart(2, '0');
+                                const month = String(date.getMonth() + 1).padStart(2, '0');
+                                const year = date.getFullYear();
+                                const australianDate = `${day}/${month}/${year}`;
+                                displayField.value = australianDate;
+                                console.log('Updated display field to:', australianDate);
+                            } else {
+                                displayField.value = '';
+                            }
+                        });
+
+                        // Sync when display field changes (manual input)
+                        displayField.addEventListener('input', function() {
+                            console.log('Display field changed:', this.value);
+                            // Convert DD/MM/YYYY to YYYY-MM-DD for the hidden input
+                            const value = this.value.trim();
+                            if (value && value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                                const [day, month, year] = value.split('/');
+                                const isoDate = `${year}-${month}-${day}`;
+                                dateInput.value = isoDate;
+                                console.log('Updated hidden input to:', isoDate);
+                            } else if (value === '') {
+                                dateInput.value = '';
+                            }
+                        });
+                    }
+                });
+
+                // Ensure hidden inputs are synced before form submission
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                    form.addEventListener('submit', function() {
+                        console.log('Form submitting, syncing dates...');
+                        // Find all date input pairs in this form
+                        const formDateInputs = form.querySelectorAll('input[name="sessionDate"]');
+                        const formDisplayFields = form.querySelectorAll('#sessionDateDisplay');
+                        
+                        formDateInputs.forEach((dateInput, index) => {
+                            const displayField = formDisplayFields[index];
+                            if (dateInput && displayField) {
+                                const value = displayField.value.trim();
+                                if (value && value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                                    const [day, month, year] = value.split('/');
+                                    const isoDate = `${year}-${month}-${day}`;
+                                    dateInput.value = isoDate;
+                                    console.log('Final sync - Updated hidden input to:', isoDate);
+                                }
+                            }
+                        });
+                    });
+                });
+            });
+        </script>           
+    </body>
+</html>
+
+
+
+
+

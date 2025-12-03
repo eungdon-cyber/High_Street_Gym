@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+    <head>
+    <title>High Street Gym - Locations</title>
+        <%- include("partials/head.ejs") %>
+    </head>
+    <body>    
+        <main>
+            <%- include("partials/header.ejs") %>
+
+            <!-- Unified Success/Warning/Caution Messages -->
+            <% if (typeof message !== 'undefined' && message) { %>
+                <div class="success-message">
+                    <% if (message === 'location_created') { %>
+                        ✅ Location successfully created!
+                    <% } else if (message === 'location_updated') { %>
+                        ✅ Location successfully updated!
+                    <% } else if (message === 'location_deleted') { %>
+                        ✅ Location successfully deleted!
+                    <% } %>
+                </div>
+            <% } else if (showWarning && warningData) { %>
+                <div class="warning-message">
+                    <div class="warning-text">
+                        ⚠️ <%= warningData.message %> Are you sure you want to proceed?
+                    </div>
+
+                    <div class="warning-actions">
+                        <form action="/locations/<%= warningData.locationId %>" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="acknowledgeLocationRemoval" value="true">
+                            <button type="submit" class="warning-confirm-btn">Confirm & Delete Location</button>
+                        </form>
+                        <button class="warning-cancel-btn" onclick="history.back()">Cancel</button>  
+                    </div>
+                </div>
+            <% } else if (showCaution && cautionData) { %>
+                <div class="caution-message">
+                    <div class="caution-text">
+                        ⚡ <%= cautionData.message %> Are you sure you want to proceed?
+                    </div>
+
+                    <div class="caution-actions">
+                        <form action="/locations/<%= cautionData.locationId %>" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="name" value="<%= cautionData.name %>">
+                            <input type="hidden" name="address" value="<%= cautionData.address %>">
+                            <input type="hidden" name="acknowledgeLocationUpdate" value="true">
+                            <button type="submit" class="caution-confirm-btn">Confirm & Update Location</button>
+                        </form>
+                        <button class="caution-cancel-btn" onclick="history.back()">Cancel</button>
+                    </div>
+                </div>
+            <% } %>
+
+        <section class="content-layout locations-page">
+            <!-- Left side: Location List -->
+            <section class="content-left-panel">
+                
+                <!-- Filter Form - At top of main list -->
+                <form method="GET" action="/locations" class="filter-form">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="locationName">Location Name:</label>
+                            <input type="text" name="locationName" value="<%= locationName || '' %>" placeholder="Search locations..." />
+                        </div>
+                        
+                        <button type="submit">Search</button>
+                    </div>
+                </form>
+                
+                <div class="cols-2 data-list">
+                    <span class="data-list-heading">Location Name</span>
+                    <span></span>
+                    
+                    <!-- Unified Management Section (Mobile) - Moved to top -->
+                    <div class="unified-management-section" id="management-form">
+                        <!-- Location Management Form -->
+                        <form 
+                            action="/locations/<%= selectedLocation ? selectedLocation.id : '' %>" 
+                            method="post" 
+                            class="form-grid">
+
+                        <%- include("partials/activity-location-form-fields", {
+                            fields: [
+                                { name: 'name', label: 'Location Name', type: 'text' },
+                                { name: 'address', label: 'Address', type: 'textarea' }
+                            ],
+                            selectedItem: selectedLocation,
+                            currentUser: currentUser
+                        }) %>
+
+                        <%- include("partials/activity-location-admin-buttons", {
+                            selectedItem: selectedLocation
+                        }) %>
+                    </form>
+                </div>
+
+                <!-- Navigation Buttons (Mobile Only) -->
+                <div class="mobile-nav-buttons">
+                    <button type="button" onclick="scrollToTop()" class="back-btn two-col">
+                        ← Back to Location
+                    </button>
+                </div>
+
+                    <% for (const location of locations) { %>
+                    <div class="session-entry <%= selectedLocation && selectedLocation.id === location.id ? 'selected' : '' %>">
+                        <span class="session-activity">
+                            <%= location.name %>
+                        </span>
+                        <a href="/locations/<%= location.id %>" class="link-button <%= selectedLocation && selectedLocation.id === location.id ? 'selected-link' : '' %>">
+                            View Details
+                        </a>
+                    </div>
+                <% } %>                                              
+            
+                </div>
+            </section>
+            
+            <!-- Right side: Location Form (Desktop) -->
+            <section class="content-right-panel">
+                <form 
+                    action="/locations/<%= selectedLocation ? selectedLocation.id : '' %>" 
+                    method="post" 
+                    class="form-grid">
+
+                    <%- include("partials/activity-location-form-fields", {
+                        fields: [
+                            { name: 'name', label: 'Location Name', type: 'text' },
+                            { name: 'address', label: 'Address', type: 'textarea' }
+                        ],
+                        selectedItem: selectedLocation,
+                        currentUser: currentUser
+                    }) %>
+
+                    <%- include("partials/activity-location-admin-buttons", {
+                        selectedItem: selectedLocation
+                    }) %>
+                </form>
+            </section>
+        </section>
+
+            <%- include("partials/footer.ejs") %>
+        </main>
+
+            <script>
+        // Auto-scroll functionality is now handled globally in header.ejs
+            </script>
+        </body>
+    </html>
+
+
+
+

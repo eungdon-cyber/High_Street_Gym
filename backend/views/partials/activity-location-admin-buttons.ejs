@@ -1,0 +1,31 @@
+<% if (currentUser && currentUser.role === 'admin') { %>
+    <% if (!selectedItem || !selectedItem.id) { %>
+    <!-- Create button - only shown to admin when no item is selected (new entry) -->
+    <input
+        class="two-col"
+        type="submit"
+        name="action"
+        value="create"
+    />
+    <!-- Clear button - only shown when creating new entry -->
+    <button type="button" onclick="clearForm()" class="link-button two-col">Clear</button>
+    <% } else { %>
+    <!-- Clear button - only shown to admin when an existing item is selected -->
+    <a href="/activities" class="link-button two-col">Clear</a>
+    
+    <!-- Update button - only shown to admin when an existing item is selected -->
+    <input
+        class="two-col link-button"
+        type="submit"
+        name="action"
+        value="update"
+    />
+    <!-- Delete button - only shown to admin when an existing item is selected -->
+    <input
+        class="two-col delete-button"
+        type="submit"
+        name="action"
+        value="delete"
+    />
+    <% } %>
+<% } %> 

@@ -1,0 +1,34 @@
+<% for (const field of fields) { %>
+    <label for="<%= field.name %>"><%= field.label %>:</label>
+    <% if (currentUser && currentUser.role === 'admin') { %>
+        <!-- Admin can edit -->
+        <% if (field.type === 'textarea') { %>
+            <textarea 
+                name="<%= field.name %>" 
+                id="<%= field.name %>" 
+                rows="4" 
+                required><%= selectedItem ? selectedItem[field.name] : '' %></textarea>
+        <% } else { %>
+            <input 
+                type="<%= field.type %>" 
+                name="<%= field.name %>" 
+                id="<%= field.name %>" 
+                value="<%= selectedItem ? selectedItem[field.name] : '' %>" 
+                required />
+        <% } %>
+    <% } else { %>
+        <!-- Non-admin users can only view -->
+        <% if (field.type === 'textarea') { %>
+            <textarea 
+                disabled 
+                class="disabled-field"
+                rows="4"><%= selectedItem ? selectedItem[field.name] : '' %></textarea>
+        <% } else { %>
+            <input 
+                type="text" 
+                value="<%= selectedItem ? selectedItem[field.name] : '' %>" 
+                disabled 
+                class="disabled-field" />
+        <% } %>
+    <% } %>
+<% } %> 

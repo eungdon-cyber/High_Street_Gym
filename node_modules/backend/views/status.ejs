@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <title>High Street Gym - Status</title>
+    <%- include("partials/head.ejs") %>
+</head>
+<body>
+    <main>
+        <%- include("partials/header.ejs") %>
+        
+        <!-- Status Hero Section -->
+        <section class="hero-section">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h2 class="hero-title"><%= status %></h2>
+                        <% if (typeof message != "undefined") { %>
+                            <p class="hero-subtitle"><%= message %></p>
+                        <% } %>
+                        <% if (typeof details != "undefined") { %>
+                            <div class="status-details">
+                                <%- details %>
+                            </div>
+                        <% } %>
+                        <div class="status-actions">
+                            <% if (typeof redirectToHome !== 'undefined' && redirectToHome) { %>
+                                <button onclick="window.location.href='/'" class="hero-cta">Okay</button>
+                            <% } else { %>
+                                <button onclick="history.back()" class="hero-cta">Okay</button>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <img src="/img/status.jpg" alt="High Street Gym Status" class="hero-img">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <%- include("partials/footer.ejs") %>
+    </main>
+
+</body>
+</html>

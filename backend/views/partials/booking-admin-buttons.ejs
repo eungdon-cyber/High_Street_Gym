@@ -1,0 +1,21 @@
+<% if (selectedBooking && selectedBooking.booking.id) { %>
+    <!-- Clear button - returns to unselected state -->
+    <a href="/bookings" class="link-button two-col">Clear</a>
+    
+    <!-- Update and Cancel buttons -->
+    <input
+        class="two-col link-button"
+        type="submit"
+        name="action"
+        value="update"
+    />
+    <input
+        class="two-col delete-button"
+        type="submit"
+        name="action"
+        value="cancel"
+    />
+<% } else { %>
+    <!-- Clear button - only shown when no booking is selected (form clear) -->
+    <button type="button" onclick="clearForm()" class="link-button two-col">Clear</button>
+<% } %>

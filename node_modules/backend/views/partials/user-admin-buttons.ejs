@@ -1,0 +1,29 @@
+<% if (!selectedUser || !selectedUser.id) { %>
+<!-- Create button - only shown when no user is selected (new entry) -->
+<input
+    class="two-col"
+    type="submit"
+    name="action"
+    value="create"
+/>
+<!-- Clear button - only shown when creating new entry -->
+<button type="button" onclick="clearForm()" class="link-button two-col">Clear</button>
+<% } else { %>
+<!-- Clear button - only shown when an existing user is selected -->
+<a href="/users" class="link-button two-col">Clear</a>
+
+<!-- Update button - only shown when an existing user is selected -->
+<input
+    class="two-col link-button"
+    type="submit"
+    name="action"
+    value="update"
+/>
+<!-- Delete button - only shown when an existing user is selected -->
+<input
+    class="two-col delete-button"
+    type="submit"
+    name="action"
+    value="delete"
+/>
+<% } %> 

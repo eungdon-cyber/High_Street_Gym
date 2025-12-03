@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+    <head>
+    <title>High Street Gym - Blogs</title>
+        <%- include("partials/head.ejs") %>
+    </head>
+    <body>
+        <main>
+            <%- include("partials/header.ejs") %>
+
+            <!-- Unified Success Messages -->
+            <% if (typeof message !== 'undefined' && message) { %>
+                <div class="success-message">
+                    <% if (message === 'blog_created') { %>
+                        ✅ Blog post successfully created!
+                    <% } else if (message === 'blog_deleted') { %>
+                        ✅ Blog post successfully deleted!
+                    <% } %>
+                </div>
+            <% } %>
+
+        <!-- ✅ Blog Management -->
+        <section class="content-layout blog-page">
+            <!-- Left side: Blog List -->
+            <section class="content-left-panel">
+                
+                <!-- Filter Form - At top of main list -->
+                <form method="GET" action="/blogs" class="filter-form">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="searchKeyword">Search By Keyword:</label>
+                            <input type="text" name="searchKeyword" value="<%= searchKeyword || '' %>" placeholder="Search in title or content..." />
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="searchAuthor">Search By Author:</label>
+                            <input type="text" name="searchAuthor" value="<%= searchAuthor || '' %>" placeholder="Search by author name..." />
+                        </div>
+                        
+                        <button type="submit">Search</button>
+                    </div>
+                    
+                    <!-- My Posts Button - Only show for logged-in users -->
+                    <% if (isAuthenticated) { %>
+                        <div class="filter-row">
+                            <a href="/blogs<%= myPosts ? '' : '?myPosts=true' %>" class="link-button">
+                                <%= myPosts ? 'Show All Posts' : 'Show My Posts' %>
+                            </a>
+                        </div>
+                    <% } %>
+                </form>
+                
+                <div class="cols-2 data-list">
+                    <span class="data-list-heading"><%= myPosts ? 'My Blog Posts' : 'All Blog Posts' %></span>
+                    <span></span>
+                    
+                    <!-- Unified Management Section (Mobile) - Moved to top -->
+                    <div class="unified-management-section" id="management-form">
+                        <!-- Blog Management Form -->
+                        <form 
+                            action="/blogs<%= selectedBlog ? '/' + selectedBlog.blog.id : '' %>" 
+                            method="post" 
+                            class="form-grid">
+
+                        <%- include("partials/blog-form-fields", {
+                            selectedBlog: selectedBlog,
+                            currentUser: currentUser
+                        }) %>
+
+                        <%- include("partials/blog-admin-buttons", {
+                            selectedBlog: selectedBlog
+                        }) %>
+                    </form>                           
+                </div>
+
+                <!-- Navigation Buttons (Mobile Only) -->
+                <div class="mobile-nav-buttons">
+                    <button type="button" onclick="scrollToTop()" class="back-btn two-col">
+                        ← Back to Blog
+                    </button>
+                </div>
+
+                <% for (const blog of blogs) { %>
+                <div class="session-entry <%= selectedBlog && selectedBlog.blog.id === blog.blog.id ? 'selected' : '' %>">
+                    <div class="blog-entry">
+                        <div class="blog-title"><%= blog.blog.title %></div>
+                        <div class="blog-meta">
+                            by <%= blog.user.firstName %> <%= blog.user.lastName %> • 
+                            <% 
+                            try {
+                                const createdDate = new Date(blog.blog.createdAt);
+                                const today = new Date();
+                                const isToday = createdDate.toDateString() === today.toDateString();
+                                
+                                if (isToday) {
+                                    // Show time if created today
+                                    const hours = createdDate.getHours().toString().padStart(2, '0');
+                                    const minutes = createdDate.getMinutes().toString().padStart(2, '0');
+                                    %><%= `${hours}:${minutes}` %><%
+                                } else {
+                                    // Show date if not created today
+                                    const day = createdDate.getDate().toString().padStart(2, '0');
+                                    const month = (createdDate.getMonth() + 1).toString().padStart(2, '0');
+                                    const year = createdDate.getFullYear();
+                                    %><%= `${day}/${month}/${year}` %><%
+                                }
+                            } catch (error) {
+                                %>N/A<%
+                            }
+                            %>
+                        </div>
+                    </div>
+                    <a href="/blogs/<%= blog.blog.id %>" class="link-button <%= selectedBlog && selectedBlog.blog.id === blog.blog.id ? 'selected-link' : '' %>">
+                                        View Details
+                                    </a>
+                </div>
+                <% } %>
+
+            </div>
+                    </section>
+            
+            <!-- Right side: Blog Form (Desktop) -->
+            <section class="content-right-panel">
+                <form 
+                    action="/blogs<%= selectedBlog ? '/' + selectedBlog.blog.id : '' %>" 
+                    method="post" 
+                    class="form-grid">
+
+                    <%- include("partials/blog-form-fields", {
+                        selectedBlog: selectedBlog,
+                        currentUser: currentUser
+                    }) %>
+
+                    <%- include("partials/blog-admin-buttons", {
+                        selectedBlog: selectedBlog
+                    }) %>
+                </form>
+            </section>
+        </section>
+
+            <%- include("partials/footer.ejs") %>
+        </main>
+
+            <script>
+        // Auto-scroll functionality is now handled globally in header.ejs
+            </script>        
+    </body>
+</html>
+
+
+
+

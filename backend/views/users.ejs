@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+    <head>
+    <title>High Street Gym - Users</title>
+        <%- include("partials/head.ejs") %>
+    </head>
+    <body>    
+        <main>
+            <%- include("partials/header.ejs") %>
+
+            <!-- Unified Success Messages -->
+            <% if (typeof message !== 'undefined' && message) { %>
+                <div class="success-message">
+                    <% if (message === 'user_created') { %>
+                        ✅ User successfully created!
+                    <% } else if (message === 'user_updated') { %>
+                        ✅ User successfully updated!
+                    <% } else if (message === 'user_deleted') { %>
+                        ✅ User successfully deleted!
+                    <% } %>
+                </div>
+            <% } else if (showWarning && warningData) { %>
+                <div class="warning-message">
+                    <div class="warning-text">
+                        ⚠️ <%= warningData.message %> Are you sure you want to proceed?
+                    </div>
+
+                    <div class="warning-actions">
+                        <form action="/users/<%= warningData.userId %>" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="<%= warningData.action %>">
+                            <% if (warningData.formData) { %>
+                                <input type="hidden" name="firstName" value="<%= warningData.formData.firstName %>">
+                                <input type="hidden" name="lastName" value="<%= warningData.formData.lastName %>">
+                                <input type="hidden" name="email" value="<%= warningData.formData.email %>">
+                                <input type="hidden" name="role" value="<%= warningData.formData.role %>">
+                                <% if (warningData.formData.password && warningData.formData.password !== '••••••••') { %>
+                                    <input type="hidden" name="password" value="<%= warningData.formData.password %>">
+                                    <input type="hidden" name="confirmPassword" value="<%= warningData.formData.confirmPassword %>">
+                                <% } %>
+                            <% } %>
+                            <% if (warningData.type === 'trainer') { %>
+                                <input type="hidden" name="acknowledgeTrainerRemoval" value="true">
+                            <% } else if (warningData.type === 'member') { %>
+                                <input type="hidden" name="acknowledgeMemberRemoval" value="true">
+                            <% } else if (warningData.type === 'roleChange') { %>
+                                <input type="hidden" name="acknowledgeRoleChange" value="true">
+                            <% } else if (warningData.type === 'trainerRoleChange') { %>
+                                <input type="hidden" name="acknowledgeTrainerRoleChange" value="true">
+                            <% } %>
+                            <button type="submit" class="warning-confirm-btn">
+                                <% if (warningData.action === 'delete') { %>
+                                    Confirm & Delete User
+                                <% } else if (warningData.action === 'update') { %>
+                                    Confirm & Update User
+                                <% } %>
+                            </button>
+                        </form>
+                        <button class="warning-cancel-btn" onclick="history.back()">Cancel</button>                        
+                    </div>
+                </div>
+            <% } else if (showCaution && cautionData) { %>
+                <div class="caution-message">
+                    <div class="caution-text">
+                        ⚡ <%= cautionData.message %> Are you sure you want to proceed?
+                    </div>
+
+                    <div class="caution-actions">
+                        <form action="/users/<%= cautionData.userId %>" method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="update">
+                            <% if (cautionData.formData) { %>
+                                <input type="hidden" name="firstName" value="<%= cautionData.formData.firstName %>">
+                                <input type="hidden" name="lastName" value="<%= cautionData.formData.lastName %>">
+                                <input type="hidden" name="email" value="<%= cautionData.formData.email %>">
+                                <input type="hidden" name="role" value="<%= cautionData.formData.role %>">
+                                <% if (cautionData.formData.password && cautionData.formData.password !== '••••••••') { %>
+                                    <input type="hidden" name="password" value="<%= cautionData.formData.password %>">
+                                    <input type="hidden" name="confirmPassword" value="<%= cautionData.formData.confirmPassword %>">
+                                <% } %>
+                            <% } %>
+                            <% if (cautionData.type === 'trainer') { %>
+                                <input type="hidden" name="acknowledgeTrainerUpdate" value="true">
+                            <% } else if (cautionData.type === 'member') { %>
+                                <input type="hidden" name="acknowledgeMemberUpdate" value="true">
+                            <% } %>
+                            <button type="submit" class="caution-confirm-btn">Confirm & Update User</button>
+                        </form>
+                        <button class="caution-cancel-btn" onclick="history.back()">Cancel</button>
+                    </div>
+                </div>
+            <% } %>
+
+                <!-- ✅ User Management (Admin Only) -->
+        <% if (currentUser && currentUser.role === "admin") { %>
+        <section class="content-layout users-page">
+            <!-- Left side: User List -->
+            <section class="content-left-panel">
+                
+                <!-- Filter Form - At top of main list -->
+                <form method="GET" action="/users" class="filter-form">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="searchKeyword">Search:</label>
+                            <input type="text" name="searchKeyword" value="<%= searchKeyword || '' %>" placeholder="Search by name..." />
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="userRole">Role:</label>
+                            <select name="userRole">
+                                <option value="">All Roles</option>
+                                <option value="admin" <%= userRole === 'admin' ? 'selected' : '' %>>Admin</option>
+                                <option value="trainer" <%= userRole === 'trainer' ? 'selected' : '' %>>Trainer</option>
+                                <option value="member" <%= userRole === 'member' ? 'selected' : '' %>>Member</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit">Search</button>
+                    </div>
+                </form>
+                
+                <div class="cols-2 data-list">
+                    <span class="data-list-heading">User</span>
+                    <span></span>
+                    
+                    <!-- Unified Management Section (Mobile) - Moved to top -->
+                    <div class="unified-management-section" id="management-form">
+                        <!-- User Management Form -->
+                        <form 
+                            action="/users/<%= selectedUser ? selectedUser.id : '' %>" 
+                            method="post" 
+                            class="form-grid">
+
+                            <%- include("partials/user-form-fields", {
+                                selectedUser: selectedUser,
+                                fieldPrefix: "mobile-",  // Add unique prefix
+                                currentUser: currentUser,
+                                cautionData: (typeof showCaution !== 'undefined' && showCaution && cautionData) ? cautionData : null
+                            }) %>
+                                
+                            <%- include("partials/user-admin-buttons", {
+                                selectedUser: selectedUser
+                            }) %>
+                        </form>                        
+                    </div>
+
+                    <!-- Navigation Buttons (Mobile Only) -->
+                    <div class="mobile-nav-buttons">
+                        <button type="button" onclick="scrollToTop()" class="back-btn two-col">
+                            ← Back to User
+                        </button>
+                    </div>
+
+                <% for (const user of users) { %>
+                <div class="session-entry <%= selectedUser && selectedUser.id === user.id ? 'selected' : '' %>">
+                    <span class="session-activity">
+                        <%= user.lastName %>, <%= user.firstName %> <span class="user-role">(<%= user.role %>)</span>
+                    </span>
+                    <a href="/users/<%= user.id %>" class="link-button <%= selectedUser && selectedUser.id === user.id ? 'selected-link' : '' %>">
+                                    View Details
+                                </a>
+                </div>
+                    <% } %>                                             
+
+            </div>
+            </section>
+
+            <!-- Right side: User Form (Desktop) -->
+            <section class="content-right-panel">
+            <form 
+                action="/users/<%= selectedUser ? selectedUser.id : '' %>" 
+                method="post" 
+                class="form-grid">
+
+                <%- include("partials/user-form-fields", {
+                    selectedUser: selectedUser,
+                    fieldPrefix: "desktop-",  // Add unique prefix
+                    currentUser: currentUser,
+                    cautionData: (typeof showCaution !== 'undefined' && showCaution && cautionData) ? cautionData : null
+                }) %>
+                                
+                <%- include("partials/user-admin-buttons", {
+                    selectedUser: selectedUser
+                }) %>
+                            </form>
+                </section>
+            </section>
+            <% } %>
+
+            <%- include("partials/footer.ejs") %>
+        </main>
+
+        <script>
+        // Auto-scroll functionality is now handled globally in header.ejs
+        </script>  
+    </body>
+</html>
+
+
+
+

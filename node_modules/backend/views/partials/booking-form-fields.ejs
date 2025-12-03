@@ -1,0 +1,117 @@
+<label for="activityName">Activity Name:</label>
+<% if (currentUser && currentUser.role === 'admin' || currentUser.role === 'member') { %>
+    <select name="activityId" id="activityName" required onchange="updateFilters()">
+        <option value="">Select Activity</option>
+        <% activities.forEach(activity => { %>
+            <option value="<%= activity.id %>" 
+                <%= selectedBooking && selectedBooking.activity.id === activity.id ? 'selected' : '' %>>
+                <%= activity.name %>
+            </option>
+        <% }); %>
+    </select>
+    <%- include("activity-tooltip-button", { selectedSession: selectedBooking }) %>
+<% } else { %>
+    <input 
+        type="text" 
+        value="<%= selectedBooking ? selectedBooking.activity.name : '' %>" 
+        disabled 
+        class="disabled-field" />
+    <%- include("activity-tooltip-button", { selectedSession: selectedBooking }) %>
+<% } %>
+
+<label for="locationId">Location:</label>
+<% if (currentUser && currentUser.role === 'admin' || currentUser.role === 'member') { %>
+    <select name="locationId" id="locationId" required onchange="updateFilters()">
+        <option value="">Select Location</option>
+        <!-- Options will be populated by JavaScript based on selected activity -->
+    </select>
+    <%- include("location-tooltip-button", { selectedSession: selectedBooking }) %>
+<% } else { %>
+    <input 
+        type="text" 
+        value="<%= selectedBooking ? selectedBooking.location.name : '' %>" 
+        disabled 
+        class="disabled-field" />
+    <%- include("location-tooltip-button", { selectedSession: selectedBooking }) %>
+<% } %>
+
+<label for="sessionDate">Date:</label>
+<% if (currentUser && currentUser.role === 'admin' || currentUser.role === 'member') { %>
+    <select name="sessionDate" id="sessionDate" required onchange="updateFilters()">
+        <option value="">Select Date</option>
+        <!-- This will be populated by JavaScript based on selected activity and location -->
+    </select>
+<% } else { %>
+    <input 
+        type="text" 
+        value="<%= selectedBooking ? selectedBooking.session.sessionDate : '' %>" 
+        disabled 
+        class="disabled-field" />
+<% } %>
+
+<label for="sessionTime">Time:</label>
+<% if (currentUser && currentUser.role === 'admin' || currentUser.role === 'member') { %>
+    <select name="sessionTime" id="sessionTime" required onchange="updateFilters()">
+        <option value="">Select Time</option>
+        <!-- This will be populated by JavaScript based on selected activity, location, and date -->
+    </select>
+<% } else { %>
+    <input 
+        type="text" 
+        value="<%= selectedBooking ? selectedBooking.session.sessionTime : '' %>" 
+        disabled 
+        class="disabled-field" />
+<% } %>
+
+<label for="trainerId">Trainer:</label>
+<% if (currentUser && currentUser.role === 'admin' || currentUser.role === 'member') { %>
+    <select name="trainerId" id="trainerId" required onchange="updateFilters()">
+        <option value="">Select Trainer</option>
+        <% users.filter(user => user.role === 'trainer').forEach(trainer => { %>
+            <option value="<%= trainer.id %>" 
+                <%= selectedBooking && selectedBooking.trainer.id === trainer.id ? 'selected' : '' %>>
+                <%= trainer.firstName %> <%= trainer.lastName %>
+            </option>
+        <% }); %>
+    </select>
+<% } else { %>
+    <input 
+        type="text" 
+        value="<%= selectedBooking ? selectedBooking.trainer.firstName + ' ' + selectedBooking.trainer.lastName : '' %>" 
+        disabled 
+        class="disabled-field" />
+<% } %>
+
+<!-- Hidden field for sessionId - only when editing existing booking -->
+<% if (selectedBooking && selectedBooking.session && selectedBooking.session.id) { %>
+<input type="hidden" name="sessionId" id="sessionId" value="<%= selectedBooking.session.id %>" data-pre-populated="true" />
+<% } %>
+
+<!-- Member field - only show when booking is selected (for admins) or for members -->
+<% if (currentUser && currentUser.role === 'admin' && selectedBooking) { %>
+    <label for="member">Member:</label>
+    <input 
+        type="text" 
+        name="memberName" 
+        id="member" 
+        value="<%= selectedBooking && selectedBooking.user ? selectedBooking.user.firstName + ' ' + selectedBooking.user.lastName + ' (' + selectedBooking.user.email + ')' : '' %>" 
+        readonly />
+    <input type="hidden" name="memberId" value="<%= selectedBooking && selectedBooking.user ? selectedBooking.user.id : '' %>" />
+<% } else if (currentUser && currentUser.role === 'member') { %>
+    <label for="member">Member:</label>
+    <input 
+        type="text" 
+        name="memberName" 
+        id="member" 
+        value="<%= currentUser.firstName %> <%= currentUser.lastName %> (Self)" 
+        disabled 
+        class="disabled-field" />
+    <input type="hidden" name="memberId" value="<%= currentUser.id %>" />
+<% } %>
+
+<!-- Admin buttons - Clear, Update, Cancel, etc. -->
+<%- include("./booking-admin-buttons", {
+    selectedBooking: selectedBooking,
+    currentUser: currentUser
+}) %>
+

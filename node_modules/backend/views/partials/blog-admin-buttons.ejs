@@ -1,0 +1,28 @@
+<% if (!selectedBlog || !selectedBlog.blog.id) { %>
+<!-- Create button - only shown to signed-in users when no blog is selected (new entry) -->
+<% if (currentUser && currentUser.role !== 'guest') { %>
+<input
+    class="two-col"
+    type="submit"
+    name="action"
+    value="create"
+/>
+<!-- Clear button - only shown when creating new entry -->
+<button type="button" onclick="clearForm()" class="link-button two-col">Clear</button>
+<% } %>
+<% } else { %>
+<!-- Clear button - only shown to author of their own blog or admin -->
+<% if (currentUser && (currentUser.role === 'admin' || currentUser.id === selectedBlog.blog.authorId)) { %>
+<a href="/blogs" class="link-button two-col">Clear</a>
+<% } %>
+
+<!-- Delete button - only shown to author of their own blog or admin -->
+<% if (currentUser && (currentUser.role === 'admin' || currentUser.id === selectedBlog.blog.authorId)) { %>
+<input
+    class="two-col delete-button"
+    type="submit"
+    name="action"
+    value="delete"
+/>
+<% } %>
+<% } %> 

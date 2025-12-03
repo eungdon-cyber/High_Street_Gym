@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+    <head>
+        <%- include("partials/head.ejs") %>
+        <title>High Street Gym - Bookings</title>
+    </head>
+    <body>
+        <main>
+            <%- include("partials/header.ejs") %>        
+            <!-- Unified Success Message -->
+            <% if (typeof message !== 'undefined' && message) { %>
+                <div class="success-message">
+                    <% if (message === 'booking_added') { %>
+                        ✅ Booking successfully added!
+                    <% } else if (message === 'booking_updated') { %>
+                        ✅ Booking successfully updated!
+                    <% } else if (message === 'booking_cancelled') { %>
+                        ✅ Booking successfully cancelled!
+                    <% } %>
+                </div>
+            <% } %>      
+            
+            <section class="content-layout">
+                <!-- Left side: Bookings List -->
+                <section class="content-left-panel">
+                    
+                    <!-- Include Previous Bookings Toggle -->
+                    <% const currentIncludePast = typeof includePast !== 'undefined' ? includePast : false; %>
+                    <div class="filter-row" style="margin-bottom: 15px;">
+                        <a href="/bookings?includePast=<%= currentIncludePast ? 'false' : 'true' %><%= memberId ? '&memberId=' + memberId : '' %><%= activityId ? '&activityId=' + activityId : '' %><%= locationId ? '&locationId=' + locationId : '' %><%= startDate ? '&startDate=' + startDate : '' %><%= endDate ? '&endDate=' + endDate : '' %>" 
+                           class="include-past-toggle <%= currentIncludePast ? 'include-past-active' : 'include-past-inactive' %>">
+                            📅 <%= currentIncludePast ? 'Show Future Bookings Only' : 'Include Previous Bookings' %>
+                        </a>
+                    </div>
+
+                    <!-- Filter Form - At top of left panel -->
+                    <form method="GET" action="/bookings" class="filter-form">
+                        <input type="hidden" name="includePast" value="<%= currentIncludePast ? 'true' : '' %>">
+                        <div class="filter-row">
+
+                            <div class="filter-group">
+                                <label for="startDate">Start Date:</label>
+                                <input type="date" name="startDate" value="<%= startDate || '' %>" />
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="endDate">End Date:</label>
+                                <input type="date" name="endDate" value="<%= endDate || '' %>" />
+                            </div>
+
+                            <% if (currentUser && currentUser.role === 'admin') { %>
+                                <div class="filter-group">
+                                    <label for="memberId">Member:</label>
+                                    <select name="memberId">
+                                        <option value="">All Members</option>
+                                        <% members.forEach(member => { %>
+                                            <option value="<%= member.id %>" <%= memberId == member.id ? 'selected' : '' %>>
+                                                <%= member.firstName %> <%= member.lastName %>
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                            <% } %>
+                            
+                            <div class="filter-group">
+                                <label for="activityId">Activity:</label>
+                                <select name="activityId">
+                                    <option value="">All Activities</option>
+                                    <% activities.forEach(activity => { %>
+                                        <option value="<%= activity.id %>" <%= activityId == activity.id ? 'selected' : '' %>>
+                                            <%= activity.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="locationId">Location:</label>
+                                <select name="locationId">
+                                    <option value="">All Locations</option>
+                                    <% locations.forEach(location => { %>
+                                        <option value="<%= location.id %>" <%= locationId == location.id ? 'selected' : '' %>>
+                                            <%= location.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+
+                            <button type="submit">Search</button>
+                        </div>
+                    </form>
+
+                    <!-- Export Button for Members -->
+                    <% if (currentUser && currentUser.role === "member") { %>
+                        <div class="filter-row">
+                            <button type="button" onclick="exportBookingHistoryXML()" class="my-sessions-btn" style="background-color: #28a745;">
+                                📊 Export My History
+                            </button>
+                        </div>
+                    <% } %>
+
+                    <!-- Unified Management Section (Mobile) - Moved to top -->
+                    <div class="unified-management-section" id="management-form">
+                        <!-- Booking Management Form -->
+                        <form 
+                            action="/bookings<%= selectedBooking ? '/' + selectedBooking.booking.id : '' %>" 
+                            method="post" 
+                            class="form-grid">
+
+                           <%- include("partials/booking-form-fields", {
+                               selectedBooking: selectedBooking,
+                               activities: activities,
+                               locations: locations,
+                               users: users,
+                               currentUser: currentUser
+                           }) %>
+                        </form>
+                        <!-- Add to Booking Form - Mobile -->
+                        <div id="mobileBookingSection" style="display: none;">
+                            <%- include("partials/booking-form-add", {
+                                selectedSession: { session: { id: null } },  // Dummy session to make partial render
+                                users: users
+                            }) %>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons (Mobile Only) -->
+                    <div class="mobile-nav-buttons">
+                        <button type="button" onclick="scrollToTop()" class="back-btn two-col">
+                            ← Back to Booking
+                        </button>
+                    </div>
+
+                   <!-- New Layout: Month/Year Title with Date/Day and Entries -->
+                   <% Object.keys(groupedBookings).forEach(yearMonth => { %>
+                       <!-- Month/Year Title - Show once per month -->
+                       <div class="month-year-header sticky-header">
+                           <h3 class="month-year-title">
+                               <% 
+                               const [year, month] = yearMonth.split('-');
+                               const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                                                  'July', 'August', 'September', 'October', 'November', 'December'];
+                               const monthName = monthNames[parseInt(month) - 1];
+                               const headerTitle = (currentUser && currentUser.role === 'member') 
+                                   ? 'My Bookings' 
+                                   : (currentUser && currentUser.role === 'admin' && memberId) 
+                                       ? 'Bookings for ' + (members.find(member => member.id == memberId)?.firstName + ' ' + members.find(member => member.id == memberId)?.lastName || 'Member')
+                                       : 'All Bookings';
+                               %>
+                               <%= headerTitle %> - <%= monthName %> <%= year %>
+                           </h3>
+                       </div>
+                       
+                       <!-- Date/Day and Entries Layout -->
+                       <div class="sessions-layout">
+                           <% Object.keys(groupedBookings[yearMonth]).forEach(day => { %>
+                               <% 
+                               const dayDate = day.split(' - ')[0];
+                               const dayName = day.split(' - ')[1];
+                               const dayNumber = dayDate.split('-')[2]; // Extract just the day number
+                               
+                               // Convert day name to 3-letter format (title case)
+                               const dayAbbreviation = dayName.substring(0, 3);
+                               
+                               const bookings = groupedBookings[yearMonth][day];
+                               %>
+                               <div class="day-row">
+                                   <!-- Left Column: Date/Day -->
+                                   <div class="date-day-column">
+                                       <div class="date-day-info">
+                                           <div class="day-date"><%= dayNumber %></div>
+                                           <div class="day-name"><%= dayAbbreviation %></div>                                          
+                                       </div>
+                                   </div>
+                                   
+                                   <!-- Right Column: Booking Entries -->
+                                   <div class="sessions-column">
+                                       <% bookings.forEach(bookingItem => { %>
+                                           <div class="session-entry <%= selectedBooking && selectedBooking.booking.id === bookingItem.booking.id ? 'selected' : '' %>" 
+                                                data-booking-id="<%= bookingItem.booking.id %>">
+                                               <span class="session-time">
+                                                   <%
+                                                   const time = bookingItem.session.sessionTime.substring(0, 5);
+                                                   const [hours, minutes] = time.split(':');
+                                                   const hour12 = hours == '00' ? '12' : hours > '12' ? (parseInt(hours) - 12).toString() : hours;
+                                                   const ampm = hours >= '12' ? 'pm' : 'am';
+                                                   %>
+                                                   <%= hour12 + ':' + minutes + ' ' + ampm %>
+                                               </span>
+                                               <span class="session-activity">
+                                                   <%= bookingItem.activity.name %>
+                                               </span>
+                                               <a href="/bookings/<%= bookingItem.booking.id %><%= memberId ? '?memberId=' + memberId : '' %>" class="link-button <%= selectedBooking && selectedBooking.booking.id === bookingItem.booking.id ? 'selected-link' : '' %>">
+                                                   View Details
+                                               </a>
+                                           </div>
+                                       <% }); %>
+                                   </div>
+                               </div>
+                           <% }); %>
+                       </div>
+                   <% }); %>
+                </section>
+
+                <!-- Right side: Booking Form (Desktop) -->
+                <section class="content-right-panel">
+                    <!-- Booking Management Form -->
+                    <form 
+                        action="/bookings<%= selectedBooking ? '/' + selectedBooking.booking.id : '' %>" 
+                        method="post" 
+                        class="form-grid">
+
+                       <%- include("partials/booking-form-fields-desk", {
+                           selectedBooking: selectedBooking,
+                           activities: activities,
+                           locations: locations,
+                           users: users,
+                           currentUser: currentUser
+                       }) %>
+                    </form>
+
+                    <!-- Add to Booking Form - Desktop -->
+                    <div id="desktopBookingSection" style="display: none;">
+                        <%- include("partials/booking-form-add", {
+                            selectedSession: { session: { id: null } },  // Dummy session to make partial render
+                            users: users
+                        }) %>
+                    </div>
+                </section>                   
+            </section>
+
+            <%- include("partials/footer.ejs") %>
+        </main>
+
+    <!-- Hidden element to store sessions data -->
+    <div id="sessionsData" data-sessions='<%- JSON.stringify(sessions || []) %>' style="display: none;"></div>
+    <script type="application/json" id="activities-data"><%- JSON.stringify(activities) %></script>
+    <script type="application/json" id="locations-data"><%- JSON.stringify(locations) %></script>
+
+    <script>
+            // Store all sessions data for filtering
+            const allSessions = JSON.parse(document.getElementById('sessionsData').getAttribute('data-sessions'));
+            
+            // Make activities and locations data available to JavaScript
+            window.activities = JSON.parse(document.getElementById('activities-data').textContent);
+            window.locations = JSON.parse(document.getElementById('locations-data').textContent);
+            
+            // Function to show/hide booking section based on sessionId
+            function updateBookingSection(sessionId) {
+                const bookingSections = document.querySelectorAll('.booking-section');
+                const bookingSessionIdInputs = document.querySelectorAll('.bookingSessionId');
+                
+                if (sessionId) {
+                    // Show all booking sections and update their sessionId inputs
+                    bookingSections.forEach(section => {
+                        section.style.display = 'block';
+                    });
+                    bookingSessionIdInputs.forEach(input => {
+                        input.value = sessionId;
+                    });
+                } else {
+                    // Hide all booking sections
+                    bookingSections.forEach(section => {
+                        section.style.display = 'none';
+                    });
+                }
+            }
+            
+            // Function to update the session booking sections
+            function updateSessionBookingSections(matchingSession) {
+                const mobileBookingSection = document.getElementById('mobileBookingSection');
+                const desktopBookingSection = document.getElementById('desktopBookingSection');
+                
+                if (matchingSession) {
+                    // Update sessionId in all booking forms (when they exist)
+                    const sessionIdInputs = document.querySelectorAll('input[name="sessionId"]');
+                    sessionIdInputs.forEach(input => {
+                        input.value = matchingSession.session.id;
+                    });
+                    
+                    // Show booking sections and update booking forms
+                    if (mobileBookingSection) {
+                        mobileBookingSection.style.display = 'block';
+                        // Update the booking section within mobile
+                        updateBookingSection(matchingSession.session.id);
+                    }
+                    if (desktopBookingSection) {
+                        desktopBookingSection.style.display = 'block';
+                        // Update the booking section within desktop
+                        updateBookingSection(matchingSession.session.id);
+                    }
+                    
+                } else {
+                    // Hide booking sections
+                    if (mobileBookingSection) {
+                        mobileBookingSection.style.display = 'none';
+                    }
+                    if (desktopBookingSection) {
+                        desktopBookingSection.style.display = 'none';
+                    }
+                    
+                    // Hide booking section
+                    updateBookingSection(null);
+                    
+                }
+            }
+            
+            // Function to update filters based on selections
+            function updateFilters() {
+                
+                // Get form elements from both mobile and desktop forms
+                const mobileActivitySelect = document.getElementById('activityName');
+                const mobileLocationSelect = document.getElementById('locationId');
+                const mobileDateSelect = document.getElementById('sessionDate');
+                const mobileTimeSelect = document.getElementById('sessionTime');
+                const mobileTrainerSelect = document.getElementById('trainerId');
+                
+                const desktopActivitySelect = document.getElementById('desktop-activityName');
+                const desktopLocationSelect = document.getElementById('desktop-locationId');
+                const desktopDateSelect = document.getElementById('desktop-sessionDate');
+                const desktopTimeSelect = document.getElementById('desktop-sessionTime');
+                const desktopTrainerSelect = document.getElementById('desktop-trainerId');
+                
+                // Determine which form triggered the change
+                const triggerElement = event ? event.target : null;
+                let sourceForm = 'mobile'; // default
+                
+                if (triggerElement && triggerElement.id && triggerElement.id.startsWith('desktop-')) {
+                    sourceForm = 'desktop';
+                }
+                
+                
+                // Use the source form values for filtering
+                const selectedActivityId = sourceForm === 'desktop' ? desktopActivitySelect.value : mobileActivitySelect.value;
+                const selectedLocationId = sourceForm === 'desktop' ? desktopLocationSelect.value : mobileLocationSelect.value;
+                const selectedDate = sourceForm === 'desktop' ? desktopDateSelect.value : mobileDateSelect.value;
+                const selectedTime = sourceForm === 'desktop' ? desktopTimeSelect.value : mobileTimeSelect.value;
+                const selectedTrainerId = sourceForm === 'desktop' ? desktopTrainerSelect.value : mobileTrainerSelect.value;
+                
+                
+            try {
+                // Filter sessions based on selections
+                const filteredSessions = allSessions.filter(session => {
+                    const activityMatch = !selectedActivityId || String(session.activity.id) === String(selectedActivityId);
+                    const locationMatch = !selectedLocationId || String(session.location.id) === String(selectedLocationId);
+                    const dateMatch = !selectedDate || session.session.sessionDate === selectedDate;
+                    const timeMatch = !selectedTime || session.session.sessionTime === selectedTime;
+                    const trainerMatch = !selectedTrainerId || String(session.user.id) === String(selectedTrainerId);
+                    
+                    return activityMatch && locationMatch && dateMatch && timeMatch && trainerMatch;
+                });
+                
+                
+                // Update sessionId for both forms (only if they exist - i.e., when editing existing bookings)
+                const sessionId = filteredSessions.length > 0 ? filteredSessions[0].session.id : '';
+                const sessionIdInput = document.getElementById('sessionId');
+                const desktopSessionIdInput = document.getElementById('desktop-sessionId');
+                
+                if (sessionIdInput) {
+                    sessionIdInput.value = sessionId;
+                }
+                if (desktopSessionIdInput) {
+                    desktopSessionIdInput.value = sessionId;
+                }
+                
+                // Check if we have a complete selection (all fields filled)
+                const allFieldsFilled = selectedActivityId && selectedLocationId && selectedDate && selectedTime && selectedTrainerId;
+                
+                if (allFieldsFilled && filteredSessions.length > 0) {
+                    // Find the exact matching session
+                    const matchingSession = filteredSessions.find(session => 
+                        String(session.activity.id) === String(selectedActivityId) &&
+                        String(session.location.id) === String(selectedLocationId) &&
+                        session.session.sessionDate === selectedDate &&
+                        session.session.sessionTime === selectedTime &&
+                        String(session.user.id) === String(selectedTrainerId)
+                    );
+                    
+                    // Update booking sections
+                    updateSessionBookingSections(matchingSession);
+                } else {
+                    // Hide booking sections if not all fields are filled
+                    updateSessionBookingSections(null);
+                }
+                
+                // Get unique values for each filter
+                    const dates = [...new Set(filteredSessions.map(session => session.session.sessionDate))];
+                    const times = [...new Set(filteredSessions.map(session => session.session.sessionTime))];
+                    const trainers = [...new Set(filteredSessions.map(session => 
+                    JSON.stringify({
+                            id: session.user.id,
+                            name: `${session.user.firstName} ${session.user.lastName}`
+                    })
+                ))].map(str => JSON.parse(str));
+                
+                // Update both forms with the same filtered data
+                updateDateOptions(dates, selectedDate);
+                updateTimeOptions(times, selectedTime);
+                    
+                    // Update location options - filter only by activity, not by current location selection
+                    const sessionsForLocation = selectedActivityId ? 
+                        allSessions.filter(session => String(session.activity.id) === String(selectedActivityId)) : 
+                        allSessions;
+                    
+                    updateLocationOptions(sessionsForLocation, selectedLocationId);
+                
+                // Update trainer options
+                updateTrainerOptions(trainers, selectedTrainerId);
+                
+            } catch (error) {
+                console.error('Error updating filters:', error);
+            }
+        }
+        
+        // Update date options for both forms
+        function updateDateOptions(dates, selectedDate) {
+            const mobileDateSelect = document.getElementById('sessionDate');
+            const desktopDateSelect = document.getElementById('desktop-sessionDate');
+            
+            [mobileDateSelect, desktopDateSelect].forEach(dateSelect => {
+                if (!dateSelect) return;
+                
+                // Clear existing options except the first one
+                while (dateSelect.options.length > 1) {
+                    dateSelect.remove(1);
+                }
+                
+                // Get current date for comparison
+                const currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+                
+                // Add new options (only future dates)
+                dates.forEach(date => {
+                    const sessionDate = new Date(date);
+                    sessionDate.setHours(0, 0, 0, 0);
+                    
+                    if (sessionDate >= currentDate) {
+                        const option = document.createElement('option');
+                        option.value = date;
+                        option.textContent = new Date(date).toLocaleDateString('en-AU');
+                        dateSelect.appendChild(option);
+                    }
+                });
+                
+                // Restore selected value if it's still valid
+                if (selectedDate && dates.includes(selectedDate)) {
+                    dateSelect.value = selectedDate;
+                }
+            });
+        }
+        
+        // Update time options for both forms
+        function updateTimeOptions(times, selectedTime) {
+            const mobileTimeSelect = document.getElementById('sessionTime');
+            const desktopTimeSelect = document.getElementById('desktop-sessionTime');
+            
+            [mobileTimeSelect, desktopTimeSelect].forEach(timeSelect => {
+                if (!timeSelect) return;
+                
+                // Clear existing options except the first one
+                while (timeSelect.options.length > 1) {
+                    timeSelect.remove(1);
+                }
+                
+                // Add new options
+                times.forEach(time => {
+                    const option = document.createElement('option');
+                    option.value = time;
+                    // Convert to 12-hour format
+                    const timeStr = time.substring(0, 5);
+                    const [hours, minutes] = timeStr.split(':');
+                    const hour12 = hours == '00' ? '12' : hours > '12' ? (parseInt(hours) - 12).toString() : hours;
+                    const ampm = hours >= '12' ? 'pm' : 'am';
+                    option.textContent = hour12 + ':' + minutes + ' ' + ampm;
+                    timeSelect.appendChild(option);
+                });
+                
+                // Restore selected value if it's still valid
+                if (selectedTime && times.includes(selectedTime)) {
+                    timeSelect.value = selectedTime;
+                }
+            });
+        }
+            
+            // Update location options for both forms
+            function updateLocationOptions(filteredSessions, selectedLocationId) {
+                
+                const mobileLocationSelect = document.getElementById('locationId');
+                const desktopLocationSelect = document.getElementById('desktop-locationId');
+                
+                [mobileLocationSelect, desktopLocationSelect].forEach(locationSelect => {
+                    if (!locationSelect) return;
+                    
+                    // Clear existing options except the first one
+                    while (locationSelect.options.length > 1) {
+                        locationSelect.remove(1);
+                    }
+                    
+                    // Get unique locations from filtered sessions
+                    const locations = [...new Set(filteredSessions
+                        .filter(session => session.location && session.location.id) // Filter out sessions without location
+                        .map(session => 
+                            JSON.stringify({
+                                id: session.location.id,
+                                name: session.location.name
+                            })
+                        ))].map(str => JSON.parse(str));
+                    
+                    
+                    // Add new options
+                    locations.forEach(location => {
+                        const option = document.createElement('option');
+                        option.value = location.id;
+                        option.textContent = location.name;
+                        locationSelect.appendChild(option);
+                    });
+                    
+                    // Restore selected value if it's still valid
+                    if (selectedLocationId && locations.some(l => String(l.id) === String(selectedLocationId))) {
+                        locationSelect.value = selectedLocationId;
+                    }
+                });
+            }
+        
+        // Update trainer options for both forms
+        function updateTrainerOptions(trainers, selectedTrainerId) {
+            const mobileTrainerSelect = document.getElementById('trainerId');
+            const desktopTrainerSelect = document.getElementById('desktop-trainerId');
+            
+            [mobileTrainerSelect, desktopTrainerSelect].forEach(trainerSelect => {
+                if (!trainerSelect) return;
+                
+                // Clear existing options except the first one
+                while (trainerSelect.options.length > 1) {
+                    trainerSelect.remove(1);
+                }
+                
+                // Add new options
+                trainers.forEach(trainer => {
+                    const option = document.createElement('option');
+                    option.value = trainer.id;
+                    option.textContent = trainer.name;
+                    trainerSelect.appendChild(option);
+                });
+                
+                // Restore selected value if it's still valid
+                if (selectedTrainerId && trainers.some(t => String(t.id) === String(selectedTrainerId))) {
+                    trainerSelect.value = selectedTrainerId;
+                }
+            });
+        }
+        
+            // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+                // Scroll to management form if a booking is selected
+                const selectedEntry = document.querySelector('.session-entry.selected');
+                const managementForm = document.getElementById('management-form');
+                
+                // Page-specific scroll logic removed - now handled globally in header.ejs
+                
+                // Add event listeners for both mobile and desktop forms
+                const mobileActivitySelect = document.getElementById('activityName');
+                const mobileLocationSelect = document.getElementById('locationId');
+                const desktopActivitySelect = document.getElementById('desktop-activityName');
+                const desktopLocationSelect = document.getElementById('desktop-locationId');
+                
+                if (mobileActivitySelect) {
+                    mobileActivitySelect.addEventListener('change', updateFilters);
+                }
+                if (mobileLocationSelect) {
+                    mobileLocationSelect.addEventListener('change', updateFilters);
+                }
+                if (desktopActivitySelect) {
+                    desktopActivitySelect.addEventListener('change', updateFilters);
+                }
+                if (desktopLocationSelect) {
+                    desktopLocationSelect.addEventListener('change', updateFilters);
+                }
+                
+                // Initialize forms if they exist
+                if ((mobileActivitySelect && mobileLocationSelect) || (desktopActivitySelect && desktopLocationSelect)) {
+                    // Check if we have a selected booking (forms should already be populated by EJS)
+                    const sessionIdInput = document.getElementById('sessionId');
+                    const desktopSessionIdInput = document.getElementById('desktop-sessionId');
+                    
+                    if (sessionIdInput && sessionIdInput.value) {
+                        
+                        // Find the current booking's session data
+                        const currentSession = allSessions.find(session => 
+                            String(session.session.id) === String(sessionIdInput.value)
+                        );
+                        
+                        if (currentSession) {
+                            
+                            // Initialize the cascading dropdowns based on the current booking
+                            setTimeout(() => {
+                                // Set activity values (this will trigger location filtering)
+                                if (mobileActivitySelect) {
+                                    mobileActivitySelect.value = currentSession.activity.id;
+                                }
+                                if (desktopActivitySelect) {
+                                    desktopActivitySelect.value = currentSession.activity.id;
+                                }
+                                
+                                // Trigger updateFilters to populate location dropdowns
+                                updateFilters();
+                                
+                                // Set other values after a delay to ensure dropdowns are populated
+                                setTimeout(() => {
+                                    const mobileLocationSelect = document.getElementById('locationId');
+                                    const mobileDateSelect = document.getElementById('sessionDate');
+                                    const mobileTimeSelect = document.getElementById('sessionTime');
+                                    const mobileTrainerSelect = document.getElementById('trainerId');
+                                    
+                                    const desktopLocationSelect = document.getElementById('desktop-locationId');
+                                    const desktopDateSelect = document.getElementById('desktop-sessionDate');
+                                    const desktopTimeSelect = document.getElementById('desktop-sessionTime');
+                                    const desktopTrainerSelect = document.getElementById('desktop-trainerId');
+                                    
+                                    // Set location values
+                                    if (mobileLocationSelect) {
+                                        mobileLocationSelect.value = currentSession.location.id;
+                                    }
+                                    if (desktopLocationSelect) {
+                                        desktopLocationSelect.value = currentSession.location.id;
+                                    }
+                                    
+                                    // Set date values
+                                    if (mobileDateSelect) {
+                                        mobileDateSelect.value = currentSession.session.sessionDate;
+                                    }
+                                    if (desktopDateSelect) {
+                                        desktopDateSelect.value = currentSession.session.sessionDate;
+                                    }
+                                    
+                                    // Set time values
+                                    if (mobileTimeSelect) {
+                                        mobileTimeSelect.value = currentSession.session.sessionTime;
+                                    }
+                                    if (desktopTimeSelect) {
+                                        desktopTimeSelect.value = currentSession.session.sessionTime;
+                                    }
+                                    
+                                    // Set trainer values
+                                    if (mobileTrainerSelect) {
+                                        mobileTrainerSelect.value = currentSession.user.id;
+                                    }
+                                    if (desktopTrainerSelect) {
+                                        desktopTrainerSelect.value = currentSession.user.id;
+                                    }
+                                    
+                                    // Final update to ensure everything is synced
+                                    updateFilters();
+                                }, 300); // Longer delay to ensure all dropdowns are populated
+                            }, 100);
+                        }
+                    } else {
+                        
+                        // No selected booking, just initialize empty forms
+                        updateFilters();
+                    }
+                }
+            });
+
+            // Auto-scroll functionality is now handled globally in header.ejs
+
+            // Function to export booking history XML
+            function exportBookingHistoryXML() {
+                window.location.href = '/bookings/export/xml/history';
+            }
+            
+            // Handle success messages - clear form and hide "Add to My Bookings" button
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOMContentLoaded - checking for success message...');
+                
+                // Check if there's a success message for booking creation
+                const successMessage = document.querySelector('.success-message');
+                console.log('Success message element:', successMessage);
+                if (successMessage) {
+                    console.log('Success message text:', successMessage.textContent);
+                }
+                
+                if (successMessage && successMessage.textContent.includes('Booking successfully added')) {
+                    console.log('Success message detected, clearing forms...');
+                    
+                    // Clear all forms
+                    const allForms = document.querySelectorAll('form[action*="/bookings"]');
+                    allForms.forEach(form => {
+                        form.reset();
+                    });
+                    
+                    // Hide all "Add to booking" sections
+                    const addToBookingSections = document.querySelectorAll('.add-to-booking-section');
+                    addToBookingSections.forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    
+                    // Hide booking sections
+                    const bookingSections = document.querySelectorAll('.booking-section');
+                    bookingSections.forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    
+                    // Clear any selected session data
+                    const sessionIdInputs = document.querySelectorAll('input[name="sessionId"]');
+                    sessionIdInputs.forEach(input => {
+                        input.value = '';
+                    });
+                    
+                    // Force update of "Add to booking" sections to reflect cleared state
+                    if (typeof updateAllAddToBookingSections === 'function') {
+                        updateAllAddToBookingSections();
+                    }
+                    
+                    console.log('Form cleared after successful booking creation');
+                } else {
+                    console.log('No success message found, forms should be visible');
+                    
+                    // Debug: Check if management forms are visible
+                    const managementSection = document.querySelector('.unified-management-section');
+                    const rightPanel = document.querySelector('.content-right-panel');
+                    console.log('Management section:', managementSection);
+                    console.log('Right panel:', rightPanel);
+                    if (managementSection) {
+                        console.log('Management section display:', window.getComputedStyle(managementSection).display);
+                    }
+                    if (rightPanel) {
+                        console.log('Right panel display:', window.getComputedStyle(rightPanel).display);
+                    }
+                }
+            });
+    </script>    
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,651 @@
+<header>
+    <div class="header-container">
+        <!-- First Row: Title and Hamburger Menu -->
+        <div class="header-top-row">
+            <div class="header-brand">
+                <img src="/img/logo.jpg" alt="Gym Logo" class="gym-logo">
+                <div class="header-text">
+                    <h1 class="gym-title">High Street Gym</h1>
+                    <p>Your fitness journey starts here!</p>
+                </div>
+            </div>
+            
+            <!-- Hamburger Menu Button -->
+            <div class="hamburger-menu">
+                <button class="hamburger-btn" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Second Row: User Greeting and Buttons -->
+        <div class="header-bottom-row">
+            <p class="role-text"><strong><%= isAuthenticated ? "Hi, " + currentUser.firstName + " (" + currentUser.role + ")!" : "Guest" %></strong></p>
+            <div class="button-container">
+                <% if (isAuthenticated) { %>
+                    <a href="/authenticate/logout" class="btn btn-secondary">Logout</a>
+                    <a href="/authenticate/profile" class="btn btn-primary">My Account</a>
+                <% } else { %>
+                    <a href="/authenticate/login" class="btn btn-secondary">Login</a>
+                    <a href="/users/register" class="btn btn-primary">Join Now</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Single Navigation for both Desktop and Mobile -->
+    <nav class="main-nav">
+        <a href="/" class="<%= typeof currentPage !== 'undefined' && currentPage === 'home' ? 'active' : '' %>">Home</a>
+        <!-- <a href="/activities" class="<%= typeof currentPage !== 'undefined' && currentPage === 'activities' ? 'active' : '' %>">Activities</a> -->
+        <!-- <a href="/locations" class="<%= typeof currentPage !== 'undefined' && currentPage === 'locations' ? 'active' : '' %>">Locations</a> -->
+        <% if (currentUser && currentUser.role === 'admin') { %>
+            <a href="/activities" class="<%= typeof currentPage !== 'undefined' && currentPage === 'activities' ? 'active' : '' %>">Activities</a>
+            <a href="/locations" class="<%= typeof currentPage !== 'undefined' && currentPage === 'locations' ? 'active' : '' %>">Locations</a>
+        <% } %>
+        <a href="/sessions" class="<%= typeof currentPage !== 'undefined' && currentPage === 'sessions' ? 'active' : '' %>">Sessions</a>
+        <% if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'member')) { %>
+            <a href="/bookings" class="<%= typeof currentPage !== 'undefined' && currentPage === 'bookings' ? 'active' : '' %>">Bookings</a>
+        <% } %>
+        <a href="/blogs" class="<%= typeof currentPage !== 'undefined' && currentPage === 'blogs' ? 'active' : '' %>">Blogs</a>
+        <% if (currentUser && currentUser.role === 'admin') { %>
+            <a href="/users" class="<%= typeof currentPage !== 'undefined' && currentPage === 'users' ? 'active' : '' %>">Users</a>
+        <% } %>
+    </nav>
+
+    <!-- Sticky Page Title -->
+    <div class="sticky-page-title">
+        <% if (typeof currentPage !== 'undefined') { %>
+            <% if (currentPage === 'home') { %>
+                <h2>Home</h2>
+            <% } else if (currentPage === 'activities') { %>
+                <h2>Activities</h2>
+            <% } else if (currentPage === 'locations') { %>
+                <h2>Locations</h2>
+            <% } else if (currentPage === 'sessions') { %>
+                <h2>Sessions</h2>
+            <% } else if (currentPage === 'bookings' && currentUser && (currentUser.role === 'admin' || currentUser.role === 'member')) { %>
+                <h2>Bookings</h2>
+            <% } else if (currentPage === 'blogs') { %>
+                <h2>Blogs</h2>
+            <% } else if (currentPage === 'users' && currentUser && currentUser.role === 'admin') { %>
+                <h2>Users</h2>
+            <% } else if (currentPage === 'login') { %>
+                <h2>Login</h2>
+            <% } else if (currentPage === 'register') { %>
+                <h2>Register</h2>
+            <% } else if (currentPage === 'profile') { %>
+                <h2>Profile</h2>
+            <% } %>
+        <% } %>
+    </div>
+    
+    <script>
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const nav = document.querySelector('.main-nav');
+            const hamburgerBtn = document.querySelector('.hamburger-btn');
+            
+            // console.log('Toggle mobile menu clicked');
+            // console.log('Nav element:', nav);
+            // console.log('Hamburger button:', hamburgerBtn);
+            
+            if (nav && hamburgerBtn) {
+                nav.classList.toggle('active');
+                hamburgerBtn.classList.toggle('active');
+                
+                // console.log('Nav classes after toggle:', nav.className);
+                // console.log('Hamburger classes after toggle:', hamburgerBtn.className);
+            }
+        }
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const nav = document.querySelector('.main-nav');
+            const hamburgerBtn = document.querySelector('.hamburger-btn');
+            
+            if (nav && nav.classList.contains('active')) {
+                if (!nav.contains(event.target) && !hamburgerBtn.contains(event.target)) {
+                    nav.classList.remove('active');
+                    hamburgerBtn.classList.remove('active');
+                }
+            }
+        });
+        
+        // Fallback navigation highlighting (in case server-side highlighting fails)
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.main-nav a');
+            
+            // Only apply if no active class is already set
+            const hasActiveLink = Array.from(navLinks).some(link => link.classList.contains('active'));
+            
+            if (!hasActiveLink) {
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+            }
+        });
+        
+        // Clear form function for management forms
+        function clearForm() {
+            // Find all forms (both desktop and mobile)
+            const forms = document.querySelectorAll('form.form-grid, form[action*="/activities"], form[action*="/locations"], form[action*="/users"], form[action*="/sessions"], form[action*="/blogs"]');
+            
+            console.log('Found forms:', forms.length);
+            
+            forms.forEach((form, index) => {
+                console.log(`Clearing form ${index + 1}:`, form);
+                
+                // Clear all input fields
+                const inputs = form.querySelectorAll('input, textarea, select');
+                console.log(`Form ${index + 1} - Found inputs:`, inputs.length);
+                
+                inputs.forEach(input => {
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;
+                    } else if (input.type === 'submit' || input.type === 'button') {
+                        // Skip submit and button inputs
+                        return;
+                    } else if (input.type === 'hidden') {
+                        // Skip hidden inputs (they often contain important data)
+                        return;
+                    } else if (input.name && (input.name.includes('createdBy') || input.name.includes('createdAt') || input.name.includes('author'))) {
+                        // Skip fields that contain default values like "Created by" and "Created at"
+                        return;
+                    } else {
+                        input.value = '';
+                    }
+                });
+                
+                // Reset select elements to first option
+                const selects = form.querySelectorAll('select');
+                selects.forEach(select => {
+                    if (select.options.length > 0) {
+                        select.selectedIndex = 0;
+                    }
+                });
+            });
+            
+            // Hide the "Add to booking" sections and ensure they stay hidden
+            const addToBookingSections = document.querySelectorAll('.add-to-booking-section');
+            addToBookingSections.forEach(section => {
+                section.style.display = 'none';
+                console.log('Hidden Add to booking section:', section);
+                // Disable all fields in the section to ensure they don't interfere
+                const allFields = section.querySelectorAll('select, input, button');
+                allFields.forEach(field => {
+                    if (field.type === 'submit' || field.type === 'button') {
+                        field.disabled = true;
+                    } else if (field.type !== 'hidden') {
+                        field.required = false;
+                        field.disabled = true;
+                    }
+                });
+            });
+            
+            // Force a synchronous update to ensure all form clearing is complete
+            // Then update all "Add to booking" sections to reflect the cleared state
+            // requestAnimationFrame(() => {
+            //     updateAllAddToBookingSections();
+            // });
+            
+            // console.log('All forms cleared successfully');
+        }
+        
+        // Synchronize forms between desktop and mobile
+        function syncForms() {
+            // Find all forms
+            const forms = document.querySelectorAll('form.form-grid, form[action*="/activities"], form[action*="/locations"], form[action*="/users"], form[action*="/sessions"], form[action*="/blogs"]');
+            
+            if (forms.length < 2) return; // Need at least 2 forms to sync
+            
+            // Add event listeners to sync changes
+            forms.forEach(form => {
+                const inputs = form.querySelectorAll('input, textarea, select');
+                
+                inputs.forEach(input => {
+                    // Skip hidden inputs and buttons
+                    if (input.type === 'hidden' || input.type === 'submit' || input.type === 'button') {
+                        return;
+                    }
+                    
+                    input.addEventListener('input', function() {
+                        syncInputValue(input, forms);
+                    });
+                    
+                    input.addEventListener('change', function() {
+                        syncInputValue(input, forms);
+                    });
+                });
+            });
+        }
+        
+        // Sync input value across all forms
+        function syncInputValue(sourceInput, forms) {
+            const inputName = sourceInput.name;
+            const inputValue = sourceInput.value;
+            const inputType = sourceInput.type;
+            
+            forms.forEach(form => {
+                if (form.contains(sourceInput)) return; // Skip the source form
+                
+                const targetInputs = form.querySelectorAll(`[name="${inputName}"]`);
+                targetInputs.forEach(targetInput => {
+                    if (targetInput.type === inputType) {
+                        if (inputType === 'checkbox' || inputType === 'radio') {
+                            targetInput.checked = sourceInput.checked;
+                        } else {
+                            targetInput.value = inputValue;
+                        }
+                    }
+                });
+            });
+        }
+        
+        // Initialize form synchronization when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            syncForms();
+            // Add a small delay to ensure all elements are rendered
+            setTimeout(() => {
+                // Ensure "Add to booking" sections are hidden by default
+                const addToBookingSections = document.querySelectorAll('.add-to-booking-section');
+                addToBookingSections.forEach(section => {
+                    section.style.display = 'none';
+                    console.log('Hidden Add to booking section on page load:', section);
+                });
+                
+                setupBookingFormWatcher();
+            }, 100);
+            
+            // Global scrollToTop function for all pages
+            window.scrollToTop = function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'auto'
+                });
+            };
+
+            // Unified tooltip system
+            window.showTooltip = function(type, id, name, content, contentLabel) {
+                // Remove any existing tooltip
+                const existingTooltip = document.getElementById(`${type}-tooltip`);
+                if (existingTooltip) {
+                    existingTooltip.remove();
+                }
+
+                // Create tooltip element
+                const tooltip = document.createElement('div');
+                tooltip.id = `${type}-tooltip`;
+                tooltip.className = 'tooltip-modal';
+
+                // Create tooltip content
+                tooltip.innerHTML = `
+                    <div class="tooltip-header">
+                        <h3 class="tooltip-title">${name}</h3>
+                        <button onclick="closeTooltip('${type}')" class="tooltip-close-btn">✕ Close</button>
+                    </div>
+                    <div class="tooltip-content">
+                        <strong>${contentLabel}:</strong><br>
+                        ${content}
+                    </div>
+                `;
+
+                // Add backdrop
+                const backdrop = document.createElement('div');
+                backdrop.id = `${type}-tooltip-backdrop`;
+                backdrop.className = 'tooltip-backdrop';
+                backdrop.onclick = () => closeTooltip(type);
+
+                // Add to page
+                document.body.appendChild(backdrop);
+                document.body.appendChild(tooltip);
+            };
+
+            // Unified close function
+            window.closeTooltip = function(type) {
+                const tooltip = document.getElementById(`${type}-tooltip`);
+                const backdrop = document.getElementById(`${type}-tooltip-backdrop`);
+                if (tooltip) tooltip.remove();
+                if (backdrop) backdrop.remove();
+            };
+
+            // Legacy functions for backward compatibility
+            window.showActivityTooltip = function(activityId, activityName, activityDescription) {
+                showTooltip('activity', activityId, activityName, activityDescription, 'Description');
+            };
+
+            window.showLocationTooltip = function(locationId, locationName, locationAddress) {
+                showTooltip('location', locationId, locationName, locationAddress, 'Address');
+            };
+
+            window.closeActivityTooltip = function() {
+                closeTooltip('activity');
+            };
+
+            window.closeLocationTooltip = function() {
+                closeTooltip('location');
+            };
+
+            // Unified event delegation for all tooltip buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('activity-tooltip-btn')) {
+                    const activityId = e.target.getAttribute('data-activity-id');
+                    const activityName = e.target.getAttribute('data-activity-name');
+                    const activityDescription = e.target.getAttribute('data-activity-description');
+                    showTooltip('activity', activityId, activityName, activityDescription, 'Description');
+                } else if (e.target.classList.contains('location-tooltip-btn')) {
+                    const locationId = e.target.getAttribute('data-location-id');
+                    const locationName = e.target.getAttribute('data-location-name');
+                    const locationAddress = e.target.getAttribute('data-location-address');
+                    showTooltip('location', locationId, locationName, locationAddress, 'Address');
+                }
+            });
+
+            // Update activity tooltip when activity selection changes
+            function updateActivityTooltip() {
+                // Try both possible activity select IDs (mobile and desktop)
+                const activitySelect = document.getElementById('activityName') || document.getElementById('desktop-activityName');
+                const activityTooltipBtns = document.querySelectorAll('.activity-tooltip-btn');
+                
+                if (activitySelect && activityTooltipBtns.length > 0) {
+                    const selectedActivityId = activitySelect.value;
+                    
+                    if (selectedActivityId && window.activities) {
+                        // Find the selected activity in the activities array
+                        const selectedActivity = window.activities.find(activity => activity.id == selectedActivityId);
+                        
+                        if (selectedActivity) {
+                            // Update ALL tooltip buttons' data attributes
+                            activityTooltipBtns.forEach(btn => {
+                                btn.setAttribute('data-activity-id', selectedActivity.id);
+                                btn.setAttribute('data-activity-name', selectedActivity.name);
+                                btn.setAttribute('data-activity-description', selectedActivity.description || 'No description available');
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Update location tooltip when location selection changes
+            function updateLocationTooltip() {
+                // Try all possible location select IDs (sessions and bookings, mobile and desktop)
+                const locationSelect = document.getElementById('location') || document.getElementById('locationId') || document.getElementById('desktop-locationId');
+                const locationTooltipBtns = document.querySelectorAll('.location-tooltip-btn');
+                
+                if (locationSelect && locationTooltipBtns.length > 0) {
+                    const selectedLocationId = locationSelect.value;
+                    
+                    if (selectedLocationId && window.locations) {
+                        // Find the selected location in the locations array
+                        const selectedLocation = window.locations.find(location => location.id == selectedLocationId);
+                        
+                        if (selectedLocation) {
+                            // Update ALL tooltip buttons' data attributes
+                            locationTooltipBtns.forEach(btn => {
+                                btn.setAttribute('data-location-id', selectedLocation.id);
+                                btn.setAttribute('data-location-name', selectedLocation.name);
+                                btn.setAttribute('data-location-address', selectedLocation.address || 'No address available');
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Listen for dropdown changes
+            document.addEventListener('change', function(e) {
+                if (e.target.id === 'activityName' || e.target.id === 'desktop-activityName') {
+                    updateActivityTooltip();
+                } else if (e.target.id === 'location' || e.target.id === 'locationId' || e.target.id === 'desktop-locationId') {
+                    updateLocationTooltip();
+                }
+            });
+
+
+            // Auto-scroll logic for all layouts when item is selected
+            const selectedItem = document.querySelector('.session-entry.selected, .activity-entry.selected, .location-entry.selected, .user-entry.selected, .blog-entry.selected');
+            if (selectedItem) {
+                // Check for warning or caution messages first
+                const warningMessage = document.querySelector('.warning-message');
+                const cautionMessage = document.querySelector('.caution-message');
+                
+                if (warningMessage) {
+                    // Scroll to warning message (instant)
+                    setTimeout(() => {
+                        warningMessage.scrollIntoView({
+                            behavior: 'auto',
+                            block: 'start'
+                        });
+                    }, 100);
+                } else if (cautionMessage) {
+                    // Scroll to caution message (instant)
+                    setTimeout(() => {
+                        cautionMessage.scrollIntoView({
+                            behavior: 'auto',
+                            block: 'start'
+                        });
+                    }, 100);
+                } else {
+                    // No messages, scroll to top for all layouts (instant)
+                    setTimeout(() => {
+                        window.scrollToTop();
+                    }, 100);
+                }
+            }
+
+            // Add debugging for form submission
+            const bookingForms = document.querySelectorAll('form[action*="/bookings"]');
+            bookingForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    console.log('Form submission attempted');
+                    console.log('Form action:', form.action);
+                    console.log('Form data:', new FormData(form));
+                    
+                    // Check if all required fields are filled
+                    const requiredFields = form.querySelectorAll('select[required], input[required]');
+                    let allValid = true;
+                    requiredFields.forEach(field => {
+                        if (!field.value || field.value === '') {
+                            console.log('Required field not filled:', field.name, field.value);
+                            allValid = false;
+                        }
+                    });
+                    console.log('All required fields valid:', allValid);
+                });
+            });
+        });
+        
+        // Setup watcher for booking form to show/hide "Add to booking" section
+        function setupBookingFormWatcher() {
+            // Find all "Add to booking" sections
+            const addToBookingSections = document.querySelectorAll('.add-to-booking-section');
+            
+            // Find all booking forms (both mobile and desktop)
+            const allBookingForms = document.querySelectorAll('form[action*="/bookings"]');
+            
+            // Monitor all forms and update all "Add to booking" sections
+            allBookingForms.forEach(form => {
+                const inputs = form.querySelectorAll('select[name="activityId"], select[name="locationId"], select[name="sessionDate"], select[name="sessionTime"], select[name="trainerId"]');
+                
+                inputs.forEach(input => {
+                    input.addEventListener('change', function() {
+                        // Check all "Add to booking" sections when any form changes
+                        updateAllAddToBookingSections();
+                    });
+                });
+            });
+            
+            // Check initial state for all sections
+            updateAllAddToBookingSections();
+        }
+        
+        // Update all "Add to booking" sections based on form completion
+        function updateAllAddToBookingSections() {
+            const addToBookingSections = document.querySelectorAll('.add-to-booking-section');
+            const allBookingForms = document.querySelectorAll('form[action*="/bookings"]');
+            
+            
+            // Check if we're viewing an existing booking (not creating a new one)
+            // Consider it viewing existing if there's a sessionId field with a value AND it was pre-populated (not dynamically set)
+            const sessionIdInput = document.querySelector('input[name="sessionId"]');
+            const isViewingExistingBooking = sessionIdInput && 
+                                            sessionIdInput.value && 
+                                            sessionIdInput.value.trim() !== '' &&
+                                            sessionIdInput.hasAttribute('data-pre-populated');
+            
+            // Check if any form is complete
+            let anyFormComplete = false;
+            
+            allBookingForms.forEach(form => {
+                if (isFormComplete(form)) {
+                    anyFormComplete = true;
+                    // Update the sessionId field in the main form with the matching session ID
+                    const sessionIdInput = form.querySelector('input[name="sessionId"]');
+                    if (sessionIdInput && !sessionIdInput.value) {
+                        const sessionId = findMatchingSessionId(form);
+                        if (sessionId) {
+                            sessionIdInput.value = sessionId;
+                        }
+                    }
+                }
+            });
+            
+            // Show/hide all "Add to booking" sections based on whether any form is complete AND we're not viewing an existing booking
+            addToBookingSections.forEach(section => {
+                if (anyFormComplete && !isViewingExistingBooking) {
+                    section.style.display = 'block';
+                    // Enable all select and input fields when showing the section
+                    const allFields = section.querySelectorAll('select, input, button');
+                    allFields.forEach(field => {
+                        if (field.type === 'submit' || field.type === 'button') {
+                            // Enable buttons
+                            field.disabled = false;
+                        } else if (field.type !== 'hidden') {
+                            // Enable form fields
+                            field.required = true;
+                            field.disabled = false;
+                        }
+                    });
+                } else {
+                    section.style.display = 'none';
+                    // Disable all select, input, and button fields when hiding the section
+                    const allFields = section.querySelectorAll('select, input, button');
+                    allFields.forEach(field => {
+                        if (field.type === 'submit' || field.type === 'button') {
+                            // Disable buttons
+                            field.disabled = true;
+                        } else if (field.type !== 'hidden') {
+                            // Disable form fields
+                            field.required = false;
+                            field.disabled = true;
+                        }
+                    });
+                }
+            });
+            
+            // Update session ID in "Add to booking" forms when section is shown
+            if (anyFormComplete && !isViewingExistingBooking) {
+                addToBookingSections.forEach(section => {
+                    const sessionIdInput = section.querySelector('#addToBookingSessionId');
+                    if (sessionIdInput) {
+                        // Find the session ID based on form selections
+                        const sessionId = findMatchingSessionId();
+                        if (sessionId) {
+                            sessionIdInput.value = sessionId;
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Handle "Add to booking" button clicks
+        function handleAddToBookingClick(e) {
+            e.preventDefault();
+            console.log('Add to booking button clicked');
+            
+            // Find the main form
+            const mainForm = e.target.closest('form[action*="/bookings"]');
+            console.log('Main form found:', mainForm);
+            
+            if (mainForm) {
+                // Set the action to create
+                const actionInput = mainForm.querySelector('input[name="action"]');
+                console.log('Action input found:', actionInput);
+                if (actionInput) {
+                    actionInput.value = 'create';
+                    console.log('Action set to create');
+                }
+                // Submit the main form
+                mainForm.submit();
+            }
+        }
+        
+        // Find the matching session ID based on form selections
+        function findMatchingSessionId() {
+            // Get values from any completed form (mobile or desktop)
+            const allForms = document.querySelectorAll('form[action*="/bookings"]');
+            let activityId, locationId, sessionDate, sessionTime, trainerId;
+            
+            for (let form of allForms) {
+                const activitySelect = form.querySelector('select[name="activityId"]');
+                const locationSelect = form.querySelector('select[name="locationId"]');
+                const dateSelect = form.querySelector('select[name="sessionDate"]');
+                const timeSelect = form.querySelector('select[name="sessionTime"]');
+                const trainerSelect = form.querySelector('select[name="trainerId"]');
+                
+                if (activitySelect?.value && locationSelect?.value && dateSelect?.value && timeSelect?.value && trainerSelect?.value) {
+                    activityId = activitySelect.value;
+                    locationId = locationSelect.value;
+                    sessionDate = dateSelect.value;
+                    sessionTime = timeSelect.value;
+                    trainerId = trainerSelect.value;
+                    break;
+                }
+            }
+            
+            if (!activityId || !locationId || !sessionDate || !sessionTime || !trainerId) {
+                return null;
+            }
+            
+            // Find the matching session from the sessions data
+            // Access the sessions data from the page
+            const sessionsDataElement = document.getElementById('sessionsData');
+            if (sessionsDataElement) {
+                try {
+                    const allSessions = JSON.parse(sessionsDataElement.getAttribute('data-sessions'));
+                    const matchingSession = allSessions.find(session => 
+                        session.activity && session.activity.id == activityId &&
+                        session.location && session.location.id == locationId &&
+                        session.session_date === sessionDate &&
+                        session.session_time === sessionTime &&
+                        session.trainer && session.trainer.id == trainerId
+                    );
+                    
+                    return matchingSession ? matchingSession.id : null;
+                } catch (error) {
+                    console.error('Error parsing sessions data:', error);
+                    return null;
+                }
+            }
+            
+            return null;
+        }
+        
+        // Check if a specific form is complete
+        function isFormComplete(form) {
+            const requiredFields = form.querySelectorAll('select[name="activityId"], select[name="locationId"], select[name="sessionDate"], select[name="sessionTime"], select[name="trainerId"]');
+            
+            for (let field of requiredFields) {
+                if (!field.value || field.value === '') {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+    </script>
+</header>
+

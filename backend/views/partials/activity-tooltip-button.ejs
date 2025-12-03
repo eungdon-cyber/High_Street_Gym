@@ -1,0 +1,9 @@
+<!-- Activity details tooltip - below form field only -->
+<div style="margin-top: 5px; grid-column: 1 / -1;">
+    <button type="button" class="activity-tooltip-btn tooltip-btn" 
+        data-activity-id="<%= selectedSession && selectedSession.activity ? selectedSession.activity.id : '' %>"
+        data-activity-name="<%= selectedSession && selectedSession.activity ? selectedSession.activity.name : 'Select an activity to view details' %>"
+        data-activity-description="<%= selectedSession && selectedSession.activity ? (selectedSession.activity.description || 'No description available') : 'Please select an activity to view its details' %>">
+        🏋️ View Activity Details
+    </button>
+</div>

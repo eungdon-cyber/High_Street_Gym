@@ -1,0 +1,27 @@
+<!-- Add to Booking section - shown when form is populated (session selected) -->
+<div class="add-to-booking-section" style="display: none;">
+    <% if (currentUser.role === 'member') { %>
+        <form action="/bookings" method="POST" class="add-to-booking-form">
+            <input type="hidden" name="action" value="create">
+            <input type="hidden" name="memberId" value="<%= currentUser.id %>">
+            <input type="hidden" name="sessionId" id="addToBookingSessionId" value="">
+            <button type="submit" class="booking-btn two-col">Add to My Bookings</button>
+        </form>
+    <% } else if (currentUser.role === 'admin') { %>
+        <form action="/bookings" method="POST" class="add-to-booking-form">
+            <label for="bookingMemberId">Add this booking to the Member:</label>
+            <select name="memberId" id="bookingMemberId" required>
+                <option value="">Select Member</option>
+                <% users.filter(user => user.role === 'member').forEach(user => { %>
+                    <option value="<%= user.id %>">
+                        <%= user.firstName %> <%= user.lastName %>
+                    </option>
+                <% }); %>
+            </select>
+            <button type="submit" class="booking-btn two-col">Add to Booking</button>
+            <input type="hidden" name="action" value="create">
+            <input type="hidden" name="sessionId" id="addToBookingSessionId" value="">
+        </form>
+    <% } %>
+</div>
+

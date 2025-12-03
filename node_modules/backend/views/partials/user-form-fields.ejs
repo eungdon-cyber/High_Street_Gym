@@ -1,0 +1,46 @@
+<label for="<%= fieldPrefix %>firstName">First Name:</label>
+<input 
+    type="text" 
+    name="firstName" 
+    id="<%= fieldPrefix %>firstName" 
+    value="<%= (typeof cautionData !== 'undefined' && cautionData && cautionData.formData) ? cautionData.formData.firstName : (selectedUser ? selectedUser.firstName : '') %>" 
+    required />
+
+<label for="<%= fieldPrefix %>lastName">Last Name:</label>
+<input 
+    type="text" 
+    name="lastName" 
+    id="<%= fieldPrefix %>lastName" 
+    value="<%= (typeof cautionData !== 'undefined' && cautionData && cautionData.formData) ? cautionData.formData.lastName : (selectedUser ? selectedUser.lastName : '') %>" 
+    required />
+
+<label for="<%= fieldPrefix %>email">Email:</label>
+<input 
+    type="email" 
+    name="email" 
+    id="<%= fieldPrefix %>email" 
+    value="<%= (typeof cautionData !== 'undefined' && cautionData && cautionData.formData) ? cautionData.formData.email : (selectedUser ? selectedUser.email : '') %>" 
+    required />
+
+<label for="<%= fieldPrefix %>role">Role:</label>
+<select name="role" id="<%= fieldPrefix %>role" required>
+    <option value="member" <%= ((typeof cautionData !== 'undefined' && cautionData && cautionData.formData) ? cautionData.formData.role : (selectedUser ? selectedUser.role : '')) === 'member' ? 'selected' : '' %>>Member</option>
+    <option value="trainer" <%= ((typeof cautionData !== 'undefined' && cautionData && cautionData.formData) ? cautionData.formData.role : (selectedUser ? selectedUser.role : '')) === 'trainer' ? 'selected' : '' %>>Trainer</option>
+    <option value="admin" <%= ((typeof cautionData !== 'undefined' && cautionData && cautionData.formData) ? cautionData.formData.role : (selectedUser ? selectedUser.role : '')) === 'admin' ? 'selected' : '' %>>Admin</option>
+</select>
+
+<label for="<%= fieldPrefix %>password">Password:</label>
+<input 
+    type="password" 
+    name="password" 
+    id="<%= fieldPrefix %>password" 
+    value="<%= (typeof cautionData !== 'undefined' && cautionData && cautionData.formData) ? cautionData.formData.password : (selectedUser && selectedUser.id ? '••••••••' : '') %>"
+    <%= !selectedUser || !selectedUser.id ? 'required' : '' %> />
+
+<label for="<%= fieldPrefix %>confirmPassword">Confirm Password:</label>
+<input 
+    type="password" 
+    name="confirmPassword" 
+    id="<%= fieldPrefix %>confirmPassword" 
+    value="<%= (typeof cautionData !== 'undefined' && cautionData && cautionData.formData) ? cautionData.formData.confirmPassword : (selectedUser && selectedUser.id ? '••••••••' : '') %>"
+    <%= !selectedUser || !selectedUser.id ? 'required' : '' %> /> 

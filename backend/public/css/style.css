@@ -1,0 +1,2159 @@
+/* General Styling */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+    margin: 0 auto;
+    width: 100%;
+    background-color: white;
+}
+
+textarea {
+    height: 6em;
+    resize: none;
+}
+
+button {
+    display: inline-flex; /* Allows buttons to align side by side */
+    justify-content: center; /* Centers the button's content */
+    align-items: center; /* Centers the button's content vertically */
+    padding: 10px 20px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 5px;
+    gap: 10px; /* Adds space between buttons */
+}
+
+button:hover {
+    background-color: #6a2f6a;
+}
+
+/* Success Message Styling */
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    text-align: center;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+/* Warning Message Styling */
+.warning-message {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.warning-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.warning-question {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    opacity: 0.9;
+    text-align: center;
+}
+
+.warning-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.warning-confirm-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.warning-confirm-btn:hover {
+    background-color: white;
+    color: #dc3545;
+    transform: translateY(-2px);
+}
+
+.warning-cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid #6c757d;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.warning-cancel-btn:hover {
+    background-color: white;
+    color: #6c757d;
+    transform: translateY(-2px);
+}
+
+/* Mobile adjustments for warning messages */
+@media (max-width: 768px) {
+    .warning-actions {
+        flex-direction: column;
+    }
+    
+    .warning-confirm-btn,
+    .warning-cancel-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Header */
+/* Header - General */
+header {
+    background-color: #30d939;
+    color: white;
+    padding: 0;
+    margin: 0;
+    position: relative; /* Ensure absolute positioning works for mobile nav */
+}
+
+/* Header container to hold everything in one row */
+.header-container {
+    display: flex;
+    justify-content: space-between; /* Space between the brand and actions */
+    align-items: center; /* Center items vertically */
+    width: 100%;
+    padding: 15px 20px; /* Add horizontal padding */
+    min-height: 80px; /* Set minimum height for the header */
+    position: relative; /* For absolute positioning of center text and hamburger */
+}
+
+/* Header brand (logo and title area) */
+.header-brand {
+    color: black;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 2;
+}
+
+/* Header actions (login/register buttons) */
+.header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    z-index: 2;
+}
+
+.role-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6a2f6a;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary, .btn-secondary {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+    background-color: #6a2f6a;
+    color: white;
+}
+
+/* Main navigation bar */
+/* Hide Hamburger Menu */
+.hamburger-menu {
+    display: none; /* Hidden by default, shown on mobile */
+}
+
+/* Sticky Page Title - Visible on both Desktop and Mobile */
+.sticky-page-title {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    padding: 12px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sticky-page-title h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 15px 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.main-nav a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.main-nav a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    text-decoration: none;
+}
+
+/* Enhanced hover effect for navigation links */
+.main-nav a:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+    border-bottom: 2px solid white;
+    padding-bottom: 6px;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Active state for current page link */
+.main-nav a.active {
+    color: #445dca !important; /* Golden yellow for better visibility */
+    font-weight: 700 !important;
+    font-size: 1.2rem;
+    border-bottom: 5px solid white !important;
+    padding-bottom: 5px;
+    text-decoration: underline !important;
+    background-color: rgba(68, 93, 202, 0.1) !important;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column; /* Stack text vertically */
+    align-items: center; /* Center align text */
+    text-align: center; /* Center the text content */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: auto;
+    z-index: 1;
+}
+
+.header-brand img.gym-logo {
+    height: calc(100% + 60px); /* Extend logo to cover header + navigation height */
+    width: auto; /* Maintain aspect ratio */
+    max-height: none; /* Remove height restriction */
+    object-fit: contain; /* Ensure the logo fits properly within the container */
+    position: absolute; /* Position absolutely to extend beyond header */
+    left: 20px; /* Align with header padding */
+    top: 0; /* Start from top of header */
+    z-index: 10; /* Ensure logo appears above navigation */
+}
+
+       /* Style for the title to keep it in one line */
+       header h1 {
+           font-size: clamp(0.9rem, 4vw, 3rem); /* Fixed clamp with proper maximum value */
+           font-weight: 800;
+           white-space: nowrap;
+           overflow: hidden;
+           text-overflow: ellipsis;
+           width: auto; /* Let it size to content */
+           text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+           letter-spacing: clamp(0.3px, 0.6vw, 1px);
+           margin-bottom: 0; /* Remove bottom margin */
+           background: black;
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           background-clip: text;
+           text-transform: uppercase;
+       }
+
+/* Style for the slogan */
+.header-text p:last-child {
+    font-style: italic;
+    font-weight: 300;
+    letter-spacing: clamp(0.3px, 0.5vw, 1px);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    opacity: 0.9;
+    font-size: clamp(0.7rem, 2vw, 1.1rem);
+}
+
+/* Main */
+.container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Home Page Styles */
+
+
+.hero-section {
+    background: #6a2f6a;
+    color: white;
+    padding: 60px 0;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+}
+
+.hero-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.hero-text {
+    flex: 1;
+}
+
+.hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+
+
+.hero-cta {
+    display: inline-block;
+    background-color: white;
+    color: #30d939;
+    padding: 15px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.hero-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    text-decoration: none;
+}
+
+.hero-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.hero-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+}
+
+/* Half-Half Layout */
+.half-half-layout {
+    display: flex;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Shared Layout - Used by both sessions and bookings pages */
+.content-layout {
+    display: flex;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.content-left-panel {
+    flex: 1;
+}
+
+
+
+/* Make data list single column on wide screen for both pages */
+.content-layout .cols-2.data-list {
+    grid-template-columns: 1fr;
+}
+
+.content-right-panel {
+    flex: 0 0 auto; /* Don't grow or shrink, size to content */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-self: flex-start; /* Align to top instead of stretching */
+}
+
+/* Unified Management Section - Mobile only */
+.unified-management-section {
+    display: none; /* Hidden by default on desktop */
+    background-color: white;
+    border: 2px solid #30d939;
+    border-radius: 8px;
+    margin: 20px auto;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(48, 217, 57, 0.1);
+    max-width: 1200px;
+}
+
+/* Mobile Navigation Buttons */
+.mobile-nav-buttons {
+    display: none; /* Hidden by default on desktop */
+    text-align: center;
+    margin: 15px 0;
+    gap: 10px;
+    justify-content: center;
+}
+
+.back-btn, .top-btn {
+    display: inline-block;
+    padding: 8px 10px;
+    background-color: orange;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    justify-self: center;
+    width: 100%;
+}
+
+.back-btn:hover, .top-btn:hover {
+    background-color: #5a2a5a;
+    text-decoration: none;
+}
+
+.booking-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-top: 3px solid #28a745;
+}
+
+.booking-section .form-grid {
+    background: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.booking-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.booking-btn:hover {
+    background-color: #218838;
+}
+
+/* Admin booking row styling */
+.admin-booking-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.admin-booking-row select {
+    flex: 1;
+    min-width: 150px;
+    width: 100%;
+}
+
+.admin-booking-row .booking-btn {
+    flex-shrink: 0;
+}
+
+/* Add to booking section - force full width */
+.add-to-booking-section {
+    grid-column: 1 / -1; /* Span all columns in the grid */
+    width: 100%;
+    margin-left: 0; /* Remove any left margin */
+    padding-left: 0; /* Remove any left padding */
+}
+
+.add-to-booking-section label,
+.add-to-booking-section select,
+.add-to-booking-section button {
+    grid-column: 1 / -1; /* Span all columns */
+    width: 100%;
+    margin-left: 0; /* Remove any left margin */
+}
+
+.add-to-booking-section select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.add-to-booking-section button {
+    display: block;
+    width: 100%;
+    pointer-events: auto;
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Data List (Left Side) */
+.cols-2.data-list {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+
+.data-list-heading {
+    font-weight: bold;
+    color: #333;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.cols-2.data-list span{
+    padding: 8px;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    align-items: center;
+}
+
+/* Blog entry styling */
+.blog-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.blog-title {
+    font-weight: bold;
+    font-size: 18px;
+    color: #333;
+}
+
+.blog-meta {
+    font-size: 14px;
+    color: purple;
+    font-weight: normal;
+}
+
+.cols-2.data-list span:last-child {
+    border-bottom: none;
+}
+
+/* Form Grid (Right Side) */
+.form-grid {
+    flex: 0 0 auto; /* Don't grow, size to content */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    align-content: start;
+}
+
+.form-grid label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-grid textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Button Styles */
+.link-button {
+    display: inline-block;
+    padding: 8px 10px;
+    background-color: #007BFF;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    justify-self: center;
+    width: 100%;
+}
+
+.link-button:hover {
+    background-color: #6a2f6a;
+    text-decoration: none;
+}
+
+.two-col {
+    grid-column: span 2;
+}
+
+/* List Section */
+.list {
+    flex: 1;
+    
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* Post Title Styling (Matches Footer Links) */
+.list a {
+    text-decoration: underline;
+    font-weight: normal;
+    color: rgb(255, 255, 255);
+    flex-grow: 1;
+}
+
+.list a:hover {
+    text-decoration: none;
+    color: darkblue;
+}
+
+/* Details Section */
+.details {
+    flex: 1;
+    max-width: 40%;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+/* Sessions page specific styles */
+.filter-form {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.filter-row {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 150px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.my-sessions-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-left: 10px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.my-sessions-btn:hover {
+    background-color: #5a2a5a;
+}
+
+.include-past-toggle {
+    width: 100%;
+    text-align: center;
+    display: block;
+    padding: 12px;
+    border: 2px solid #30d939;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.include-past-inactive {
+    background-color: #fff;
+    color: #30d939;
+}
+
+.include-past-active {
+    background-color: #30d939;
+    color: #6a2f6a;
+}
+
+.include-past-toggle:hover {
+    opacity: 0.8;
+    transform: translateY(-1px);
+}
+
+.sessions-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.day-group {
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.day-title {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.session-entry {
+    display: grid;
+    grid-template-columns: 80px 1fr auto;
+    gap: 15px;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+/* Blog-specific layout - give title more space */
+.blog-page .session-entry {
+    grid-template-columns: 1fr auto !important;
+}
+
+/* Keep blog titles left-aligned on mobile */
+.blog-page .session-entry {
+    text-align: left !important;
+}
+
+/* Users page - give names more space on desktop */
+.users-page .session-entry {
+    grid-template-columns: 1fr auto !important;
+}
+
+/* Activities page - give names more space on desktop */
+.activities-page .session-entry {
+    grid-template-columns: 1fr auto !important;
+}
+
+/* Locations page - give names more space on desktop */
+.locations-page .session-entry {
+    grid-template-columns: 1fr auto !important;
+}
+
+
+/* Style user roles with blue color */
+.user-role {
+    color: #007BFF;
+}
+
+/* Sessions Layout Styles */
+.sessions-layout {
+    margin-bottom: 20px;
+}
+
+.day-row {
+    display: flex;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+.date-day-column {
+    flex: 0 0 120px;
+    padding-right: 15px;
+}
+
+.date-day-info {
+    text-align: center;
+}
+
+.day-date {
+    font-size: 1em;
+    font-weight: bold;
+    color: brown
+}
+
+.day-name {
+    font-size: 1.2em;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.sessions-column {
+    flex: 1;
+}
+
+/* Disabled form fields for non-admin users */
+.disabled-field {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    pointer-events: none;
+}
+
+
+/* Footer */
+footer {
+    background-color: #30d939;
+    color: white;
+    padding: 30px 20px;
+    margin-top: 0;
+    border-top: black 2px solid;
+}
+
+/* Hide mobile footer on desktop */
+.footer-mobile {
+    display: none;
+}
+
+/* Desktop Footer */
+.footer-desktop {
+    display: block;
+    padding: 30px 20px;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 auto;
+    gap: 40px;
+}
+
+.footer-section {
+    flex: 1;
+}
+
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-logo {
+    margin-bottom: 15px;
+}
+
+.footer-logo-img {
+    height: 120px;
+    width: auto;
+    object-fit: contain;
+}
+
+.social-links {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.social-link {
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.social-link:hover {
+    opacity: 0.8;
+    text-decoration: none;
+}
+
+.social-link i {
+    font-size: 20px;
+    transition: opacity 0.3s ease;
+}
+
+/* Facebook brand color */
+.social-link .fa-facebook-f {
+    color: #1877f2;
+}
+
+/* Twitter brand color */
+.social-link .fa-twitter {
+    color: #1da1f2;
+}
+
+/* LinkedIn brand color */
+.social-link .fa-linkedin-in {
+    color: #0077b5;
+}
+
+/* YouTube brand color */
+.social-link .fa-youtube {
+    color: #ff0000;
+}
+
+.social-link:hover i {
+    opacity: 0.8;
+}
+
+.footer-section h3 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+
+.footer-section h4 {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.footer-section p {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.footer-section a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 5px;
+    transition: opacity 0.3s ease;
+}
+
+.footer-section a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px 20px;
+    }
+    
+    /* First row: Title and hamburger menu */
+    .header-top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        order: 1; /* Keep title and hamburger on top */
+    }
+    
+    /* Ensure header-brand takes up available space */
+    .header-brand {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Second row: User greeting and buttons */
+    .header-bottom-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        order: 2; /* Move user greeting and buttons below */
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .header-actions {
+        flex-direction: row; /* Make role text and buttons horizontal on mobile */
+        justify-content: space-between; /* Spread role text and buttons apart */
+        order: -1; /* Move header-actions to the top */
+        width: 100%; /* Ensure full width */
+        align-items: center; /* Center items vertically */
+        flex-wrap: wrap; /* Allow wrapping on very narrow screens */
+        gap: 10px; /* Space between wrapped items */
+    }
+    
+    .header-brand {
+        order: 1; /* Move header-brand below header-actions */
+    }
+       
+    .header-text {
+        position: relative; /* Change from absolute to relative on mobile */
+        left: auto;
+        top: auto;
+        transform: none; /* Remove the centering transform */
+        width: auto; /* Let it size to content */
+        text-align: center;
+        display: flex;
+        flex-direction: column; /* Stack title and slogan vertically */
+        align-items: center;
+        gap: 5px; /* Space between title and slogan */
+    }
+    
+    /* Position hamburger within header-top-row */
+    .hamburger-menu {
+        display: block !important;
+        position: relative; /* Position relative to header-top-row */
+        flex-shrink: 0; /* Don't shrink the hamburger menu */
+        z-index: 10;
+    }
+    
+    .hamburger-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .hamburger-btn span {
+        width: 25px;
+        height: 3px;
+        background-color: white;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }    
+
+    /* Header-text styling without positioning context */
+    .header-text {
+        margin: 0; /* Remove margins since flexbox handles spacing */
+        text-align: center;
+    }
+    
+    /* Mobile-specific sizing for better balance */
+    .role-text {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .btn {
+        padding: 4px 8px; /* Reduced to about 2/3 of original size */
+        font-size: 0.75rem; /* Smaller font to match smaller buttons */
+    }       
+        
+    /* Mobile Navigation */
+    /* Hide desktop navigation on mobile */
+    .main-nav {
+        display: none;
+    }
+
+    /* Show mobile navigation when active */
+    .main-nav.active {
+        display: flex !important;
+        flex-direction: column;
+        background-color: #823b82;
+        padding: 15px 25px;
+        position: absolute;
+        top: 100%;
+        left: 20px;
+        z-index: 9999;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        gap: 0;
+        width: auto;
+        min-width: 200px;
+        border-radius: 8px;
+    }
+
+    .main-nav.active a {
+        color: white;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background-color 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .main-nav.active a:last-child {
+        border-bottom: none;
+    }
+
+    .main-nav.active a:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding-left: 10px;
+    }
+
+    .main-nav.active a.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: #ffd700;
+        font-weight: 600;
+    }
+
+    .header-brand img.gym-logo {
+        display: none; /* Hide logo on mobile */
+    }
+    
+    /* Hide slogan on narrow screens */
+    .header-text p:last-child {
+        display: none;
+    }
+    
+    /* Title size for mobile */
+    header h1 {
+        font-size: clamp(0.9rem, 5vw, 1.92rem); /* Responsive mobile size that reduces but never below 0.9rem */
+        white-space: normal; /* Allow text to wrap on mobile */
+        text-align: center; /* Center the wrapped text */
+        line-height: 1.2; /* Tighter line spacing for wrapped text */
+    }
+
+    /* Footer responsive design */
+    .footer-desktop {
+        display: none;
+    }
+    
+    .footer-mobile {
+        display: block;
+        padding: 1px 15px; /* Minimal padding */
+        margin: 0; /* Remove any default margins */
+    }
+    
+    .footer-mobile a {
+        margin: 0; /* Remove margins from footer links */
+        padding: 5px 5px; /* Minimal padding on links */
+    }
+    
+    /* Override main footer padding on mobile */
+    footer {
+        padding: 10px 20px; /* Much smaller padding for mobile */
+    }
+
+    .footer-mobile-links a {
+        color: white;
+        text-decoration: none;
+        font-size: 0.9rem;
+        padding: 8px 15px;
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.1);
+        transition: background-color 0.3s ease;
+    }
+
+    .footer-mobile-links a:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .footer-mobile-copyright p {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        margin: 0;
+    }
+
+    /* Mobile Layout for Activities */
+    .half-half-layout {
+        flex-direction: column;
+        gap: 20px;
+        padding: 15px;
+    }
+
+    /* Mobile Layout for Sessions and Bookings */
+    .content-layout {
+        flex-direction: column;
+        gap: 20px;
+        padding: 15px;
+    }
+
+    .content-right-panel {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .booking-section {
+        padding: 15px;
+        margin-top: 0;
+    }
+
+    /* Show unified management section on mobile */
+    .unified-management-section {
+        display: block;
+        max-width: none;
+        margin: 20px 0;
+        padding: 15px;
+        width: 100%;
+        box-sizing: border-box;
+        background-color: white;
+        border: 2px solid #6a2f6a;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(106, 47, 106, 0.1);
+    }
+
+    /* Show navigation buttons on mobile */
+    .mobile-nav-buttons {
+        display: flex;
+    }
+
+    /* Use CSS Grid to reposition the form below the list on mobile */
+    .content-layout {
+        display: grid;
+        grid-template-areas: 
+            "left"
+            "right";
+        gap: 20px;
+    }
+    
+    .content-left-panel {
+        grid-area: left;
+    }
+    
+    .content-right-panel {
+        grid-area: right;
+        margin-top: 20px;
+        display: none; /* Hide right panel on mobile to prevent duplicate forms */
+    }
+
+    .data-list-heading {
+        display: none;
+    }
+
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+
+    .two-col {
+        grid-column: span 1;
+    }
+
+    /* Mobile Home Page Styles */
+    .hero-content {
+        flex-direction: column-reverse;
+        text-align: center;
+        gap: 30px;
+    }
+
+    .hero-title {
+        font-size: clamp(1.8rem, 6vw, 2.5rem);
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1rem, 4vw, 1.4rem);
+    }
+
+    .hero-cta {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+
+    .hero-img {
+        max-width: 80%;
+    }
+
+    /* Filter forms use natural flex-wrap behavior */
+    .filter-row {
+        flex-wrap: wrap;
+        align-items: end;
+    }
+    
+    .my-sessions-btn {
+        margin-left: 10px;
+        align-self: flex-end;
+    }
+
+    .filter-group {
+        min-width: 120px;
+    }
+
+    .session-entry {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        text-align: center;
+        display: flex !important;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        padding: 8px 5px;
+    }
+
+    .session-time {
+        font-size: 16px;
+    }
+
+    .booking-section {
+        margin-top: 20px;
+        padding: 15px;
+    }
+
+    /* Layout and spacing */
+    .sessions-layout {
+        padding: 10px;
+        gap: 15px;
+    }
+
+    /* Session elements styling */
+    .session-time {
+        font-weight: 600;    /* Make time bold */
+        color: #007bff;      /* Blue color for time */
+    }
+
+    .session-activity {
+        line-height: 1.3;           /* Better text spacing */
+        word-break: break-word;     /* Break long words */
+        white-space: nowrap;        /* Prevent text wrapping */
+    }
+
+    .session-entry .link-button {
+        padding: 6px 10px;          /* Compact button size */
+        white-space: nowrap;        /* Keep button text on one line */
+        width: auto;                /* Button takes only needed width */
+        min-width: fit-content;     /* Ensure button doesn't shrink too much */ 
+    }
+
+    /* Text overflow handling */
+    .session-entry span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Stack elements vertically on narrow screens */
+    .session-entry .session-time,
+    .session-entry .session-activity,
+    .session-entry .link-button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.session-entry:last-child {
+    border-bottom: none;
+}
+
+.session-entry:hover {
+    background-color: #f8f9fa;
+}
+
+.link-button.selected-link {
+    background-color: #6a2f6a;
+    color: white;
+}
+
+.session-time {
+    font-weight: 600;
+    color: #007bff;
+    font-size: 14px;
+}
+
+.session-activity {
+    font-weight: 500;
+    color: #333;
+}
+
+.booking-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.booking-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.booking-btn {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.booking-btn:hover {
+    background-color: #6a2f6a;
+}
+
+/* Sticky Month/Year Header Styles */
+.sticky-header {
+    position: sticky;
+    top: 48px; /* Position below the sticky page title */
+    background-color: #f8f9fa;
+    z-index: 99; /* Lower than page title but above content */
+    padding: 10px 0;
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 10px;
+}
+
+.month-year-title {
+    margin: 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #495057;
+}
+
+/* Status Page Specific Styles */
+.status-actions {
+    margin-top: 30px;
+}
+
+.status-details {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #30d939;
+}
+
+.status-details p {
+    margin: 0 0 10px 0;
+}
+
+.status-details p:last-child {
+    margin-bottom: 0;
+}
+
+/* Profile Page Specific Styles */
+.profile-details {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #30d939;
+}
+
+.profile-item {
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.profile-item:last-child {
+    margin-bottom: 0;
+}
+
+.profile-item strong {
+    color: #30d939;
+    font-weight: 600;
+}
+
+/* Admin Statistics Styles */
+.admin-statistics {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #30d939;
+}
+
+.statistics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 20px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #30d939;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Mobile adjustments for status and profile pages */
+@media (max-width: 768px) {
+    .status-actions {
+        text-align: center;
+    }
+    
+    .profile-item {
+        font-size: 1rem;
+    }
+    
+    .statistics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .session-item,
+    .booking-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .session-actions,
+    .booking-actions {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+}
+
+/* Shared Upcoming Events Styles (Sessions & Bookings) */
+.trainer-sessions,
+.member-bookings {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 25px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #30d939;
+}
+
+.session-item,
+.booking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 15px;
+}
+
+.session-item:last-child,
+.booking-item:last-child {
+    margin-bottom: 0;
+}
+
+.session-summary,
+.booking-summary {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.session-row,
+.booking-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.session-activity,
+.booking-activity {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #30d939;
+}
+
+.session-location,
+.booking-location {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.session-date,
+.booking-date {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.session-time,
+.booking-time {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.session-separator,
+.booking-separator {
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 300;
+}
+
+.session-actions,
+.booking-actions {
+    margin-left: 15px;
+}
+
+.session-link,
+.booking-link {
+    display: inline-block;
+    background-color: #30d939;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.session-link:hover,
+.booking-link:hover {
+    background-color: #28a745;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* Login Page Specific Styles */
+.login-form {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #30d939;
+    max-width: 400px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #30d939;
+    font-size: 1rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #30d939;
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(48, 217, 57, 0.2);
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.login-form .hero-cta {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.login-links {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.login-links p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+}
+
+.login-link {
+    color: #30d939;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.login-link:hover {
+    color: #28a745;
+    text-decoration: underline;
+}
+
+/* Mobile adjustments for login page */
+@media (max-width: 768px) {
+    .login-form {
+        max-width: 100%;
+        padding: 20px;
+    }
+}
+
+/* Register Page Specific Styles */
+.register-form {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #30d939;
+    max-width: 400px;
+}
+
+.register-links {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.register-links p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+}
+
+.register-link {
+    color: #30d939;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.register-link:hover {
+    color: #28a745;
+    text-decoration: underline;
+}
+
+/* Mobile adjustments for register page */
+@media (max-width: 768px) {
+    .register-form {
+        max-width: 100%;
+        padding: 20px;
+    }
+}
+
+/* No Events Message */
+.no-events {
+    text-align: center;
+    padding: 30px;
+    color: rgba(255, 255, 255, 0.6);
+    font-style: italic;
+    font-size: 1.1rem;
+}
+
+.no-events p {
+    margin: 0;
+}
+
+/* Warning Modal Styles */
+.warning-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.warning-modal {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border: 2px solid #dc3545;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.warning-header h3 {
+    color: #dc3545;
+    margin: 0 0 20px 0;
+    font-size: 1.4rem;
+    text-align: center;
+}
+
+.warning-content {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.warning-content p {
+    margin: 10px 0;
+}
+
+.warning-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.warning-confirm-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.warning-confirm-btn:hover {
+    background-color: white;
+    color: #dc3545;
+    transform: translateY(-2px);
+}
+
+.warning-cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.warning-cancel-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .warning-modal {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    .warning-actions {
+        flex-direction: column;
+    }
+    
+    .warning-confirm-btn,
+    .warning-cancel-btn {
+        width: 100%;
+    }
+}
+
+/* Caution Message Styling */
+.caution-message {
+    background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    border-left: 4px solid #ffc107;
+    box-shadow: 0 4px 15px rgba(253, 126, 20, 0.3);
+}
+
+.caution-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.caution-question {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    opacity: 0.9;
+    text-align: center;
+}
+
+.caution-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.caution-confirm-btn {
+    background-color: #fd7e14;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.caution-confirm-btn:hover {
+    background-color: white;
+    color: #fd7e14;
+    transform: translateY(-2px);
+}
+
+.caution-cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: 2px solid #6c757d;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.caution-cancel-btn:hover {
+    background-color: white;
+    color: #6c757d;
+    transform: translateY(-2px);
+}
+
+/* Mobile adjustments for caution messages */
+@media (max-width: 768px) {
+    .caution-actions {
+        flex-direction: column;
+    }
+    
+    .caution-confirm-btn,
+    .caution-cancel-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+/* Readonly field styling for blog forms */
+.readonly-field {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+    border: 1px solid #dee2e6;
+}
+
+.readonly-field:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: #dee2e6;
+}
+
+
+/* Global scroll behavior - make all scrolling instantaneous */
+html {
+    scroll-behavior: auto !important;
+}
+
+* {
+    scroll-behavior: auto !important;
+}
+
+/* Tooltip button styles */
+.tooltip-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 8px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.tooltip-btn:hover {
+    background-color: #218838;
+    color: white;
+    text-decoration: none;
+}
+
+.tooltip-btn:active {
+    background-color: #1e7e34;
+    transform: translateY(1px);
+}
+
+/* Tooltip modal styles */
+.tooltip-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 2px solid #28a745;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 10000;
+    max-width: 500px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.tooltip-title {
+    margin: 0;
+    color: #28a745;
+    font-size: 18px;
+}
+
+.tooltip-close-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.tooltip-close-btn:hover {
+    background: #c82333;
+}
+
+.tooltip-content {
+    color: #333;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.tooltip-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+}
+
+

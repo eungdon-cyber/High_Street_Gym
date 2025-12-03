@@ -1,0 +1,9 @@
+<!-- Location details tooltip - below form field only -->
+<div style="margin-top: 5px; grid-column: 1 / -1;">
+    <button type="button" class="location-tooltip-btn tooltip-btn" 
+        data-location-id="<%= selectedSession && selectedSession.location ? selectedSession.location.id : '' %>"
+        data-location-name="<%= selectedSession && selectedSession.location ? selectedSession.location.name : 'Select a location to view details' %>"
+        data-location-address="<%= selectedSession && selectedSession.location ? (selectedSession.location.address || 'No address available') : 'Please select a location to view its details' %>">
+        🧭 View Location Details
+    </button>
+</div>

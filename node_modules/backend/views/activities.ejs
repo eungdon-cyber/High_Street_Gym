@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <title>High Street Gym - Activities</title>
+    <%- include("partials/head.ejs") %>
+</head>
+<body> 
+    <main>
+        <%- include("partials/header.ejs") %>
+
+
+        <!-- Unified Success/Warning/Caution Messages -->
+        <% if (typeof message !== 'undefined' && message) { %>
+            <div class="success-message">
+                <% if (message === 'activity_created') { %>
+                    ✅ Activity successfully created!
+                <% } else if (message === 'activity_updated') { %>
+                    ✅ Activity successfully updated!
+                <% } else if (message === 'activity_deleted') { %>
+                    ✅ Activity successfully deleted!
+                <% } %>
+            </div>
+        <% } else if (showWarning && warningData) { %>
+            <div class="warning-message">
+                <div class="warning-text">
+                    ⚠️ <%= warningData.message %> Are you sure you want to proceed?
+                </div>
+                <div class="warning-actions">
+                    <form action="/activities/<%= warningData.activityId %>" method="post" style="display: inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="acknowledgeActivityRemoval" value="true">
+                        <button type="submit" class="warning-confirm-btn">Confirm & Delete Activity</button>
+                    </form>
+                    <button class="warning-cancel-btn" onclick="history.back()">Cancel</button>  
+                </div>
+            </div>
+        <% } else if (showCaution && cautionData) { %>
+            <div class="caution-message">
+                <div class="caution-text">
+                    ⚡ <%= cautionData.message %> Are you sure you want to proceed?
+                </div>
+                <div class="caution-actions">
+                    <form action="/activities/<%= cautionData.activityId %>" method="post" style="display: inline;">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" name="name" value="<%= cautionData.name %>">
+                        <input type="hidden" name="description" value="<%= cautionData.description %>">
+                        <input type="hidden" name="acknowledgeActivityUpdate" value="true">
+                        <button type="submit" class="caution-confirm-btn">Confirm & Update Activity</button>
+                    </form>
+                    <button class="caution-cancel-btn" onclick="history.back()">Cancel</button>
+                </div>
+            </div>
+        <% } %>
+
+        <section class="content-layout activities-page">
+            <!-- Left side: Activity List -->
+            <section class="content-left-panel">
+                
+                <!-- Filter Form - At top of main list -->
+                <form method="GET" action="/activities" class="filter-form">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="activityName">Activity Name:</label>
+                            <input type="text" name="activityName" value="<%= activityName || '' %>" placeholder="Search activities..." />
+                        </div>
+                        
+                        <button type="submit">Search</button>
+                    </div>
+                </form>
+                
+                <div class="cols-2 data-list">
+                    <span class="data-list-heading">Activity Name</span>
+                    <span></span>
+                    
+                    <!-- Unified Management Section (Mobile) - Moved to top -->
+                    <div class="unified-management-section" id="management-form">
+                        <!-- Activity Management Form -->
+
+                        <form 
+                            action="/activities/<%= selectedActivity ? selectedActivity.id : '' %>" 
+                            method="post" 
+                            class="form-grid">
+
+                        <%- include("partials/activity-location-form-fields", {
+                            fields: [
+                                { name: 'name', label: 'Activity Name', type: 'text' },
+                                { name: 'description', label: 'Description', type: 'textarea' }
+                            ],
+                            selectedItem: selectedActivity,
+                            currentUser: currentUser
+                        }) %>
+
+                        <%- include("partials/activity-location-admin-buttons", {
+                            selectedItem: selectedActivity
+                        }) %>
+                    </form>
+                </div>
+
+                <!-- Navigation Buttons (Mobile Only) -->
+                <div class="mobile-nav-buttons">
+                    <button type="button" onclick="scrollToTop()" class="back-btn two-col">
+                        ← Back to Activity
+                    </button>
+                </div>
+
+                    <% for (const activity of activities) { %>
+                    <div class="session-entry <%= selectedActivity && selectedActivity.id === activity.id ? 'selected' : '' %>">
+                        <span class="session-activity">
+                            <%= activity.name %>
+                        </span>
+                        <a href="/activities/<%= activity.id %>" class="link-button <%= selectedActivity && selectedActivity.id === activity.id ? 'selected-link' : '' %>">
+                            View Details
+                        </a>
+                    </div>
+            <% } %>
+            
+            </div>
+        </section>
+        
+            <!-- Right side: Activity Form (Desktop) -->
+            <section class="content-right-panel">
+
+                <form 
+                    action="/activities/<%= selectedActivity ? selectedActivity.id : '' %>" 
+                    method="post" 
+                    class="form-grid">
+
+                    <%- include("partials/activity-location-form-fields", {
+                        fields: [
+                            { name: 'name', label: 'Activity Name', type: 'text' },
+                            { name: 'description', label: 'Description', type: 'textarea' }
+                        ],
+                        selectedItem: selectedActivity,
+                        currentUser: currentUser
+                    }) %>
+
+                    <%- include("partials/activity-location-admin-buttons", {
+                        selectedItem: selectedActivity
+                    }) %>
+                </form>
+            </section>
+        </section>
+
+        <%- include("partials/footer.ejs") %>
+    </main>
+
+    <script>
+        // Auto-scroll functionality is now handled globally in header.ejs
+    </script>
+</body>
+</html>
+
+
+
+

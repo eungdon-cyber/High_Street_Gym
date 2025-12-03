@@ -1,0 +1,40 @@
+<label for="title">Title:</label>
+<input 
+    type="text" 
+    name="title" 
+    id="title" 
+    value="<%= selectedBlog ? selectedBlog.blog.title : '' %>" 
+    <%= !isAuthenticated ? 'disabled class="disabled-field"' : (selectedBlog ? 'disabled class="disabled-field"' : '') %> />
+
+
+<label for="createdBy">Created by:</label>
+<input 
+    type="text" 
+    name="createdBy" 
+    id="createdBy" 
+    value="<%= selectedBlog ? (() => {
+        const authorName = selectedBlog.user.firstName + ' ' + selectedBlog.user.lastName;
+        if (currentUser && currentUser.id === selectedBlog.blog.authorId) {
+            return authorName + ' (Self)';
+        }
+        return authorName;
+    })() : (currentUser && currentUser.firstName ? currentUser.firstName + ' ' + currentUser.lastName : '') %>" 
+    disabled 
+    class="disabled-field" />
+
+
+<label for="createdAt">Created at:</label>
+<input 
+    type="text" 
+    name="createdAt" 
+    id="createdAt" 
+    value="<%= selectedBlog ? (() => { try { return new Date(selectedBlog.blog.createdAt).toLocaleString('en-AU', { timeZone: 'Australia/Brisbane' }); } catch(e) { return 'N/A'; } })() : (isAuthenticated ? 'Now' : '') %>" 
+    disabled 
+    class="disabled-field" />
+
+
+<label for="content">Content:</label>
+<textarea 
+    name="content" 
+    id="content" 
+    <%= !isAuthenticated ? 'disabled class="disabled-field"' : (selectedBlog ? 'disabled class="disabled-field"' : '') %>><%= selectedBlog ? selectedBlog.blog.content : '' %></textarea> 

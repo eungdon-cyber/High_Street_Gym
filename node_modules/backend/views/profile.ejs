@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+    <head>
+        <title>My Profile - High Street Gym</title>
+        <%- include("partials/head.ejs") %>
+    </head>
+    <body>
+        <main>
+            <%- include("partials/header.ejs") %>
+
+            <!-- Profile Hero Section -->
+            <section class="hero-section">
+                <div class="hero-container">
+                    <div class="hero-content">
+                        <div class="hero-text">
+                            <h2 class="hero-title">Welcome back, <%= currentUser.firstName %>!</h2>
+                            <p class="hero-subtitle">Your Profile Information</p>
+                            
+                            <div class="profile-details">
+                                <div class="profile-item">
+                                    <strong>Role:</strong> <%= currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1) %>
+                                </div>
+                                <div class="profile-item">
+                                    <strong>First Name:</strong> <%= currentUser.firstName %>
+                                </div>
+                                <div class="profile-item">
+                                    <strong>Last Name:</strong> <%= currentUser.lastName %>
+                                </div>
+                                <div class="profile-item">
+                                    <strong>Email:</strong> <%= currentUser.email %>
+                                </div>
+                            </div>
+                            
+                            <% if (currentUser.role === 'admin' && typeof statistics !== 'undefined') { %>
+                                <p class="hero-subtitle">Gym Statistics</p>
+                                <div class="admin-statistics">
+                                    <div class="statistics-grid">
+                                        <div class="stat-item">
+                                            <div class="stat-number"><%= statistics.activities %></div>
+                                            <div class="stat-label">Activities</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number"><%= statistics.locations %></div>
+                                            <div class="stat-label">Locations</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number"><%= statistics.sessions %></div>
+                                            <div class="stat-label">Sessions</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number"><%= statistics.bookings %></div>
+                                            <div class="stat-label">Bookings</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number"><%= statistics.users %></div>
+                                            <div class="stat-label">Users</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-number"><%= statistics.blogs %></div>
+                                            <div class="stat-label">Blog Posts</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                            
+                            <% if (currentUser.role === 'trainer') { %>
+                                <p class="hero-subtitle">Upcoming Sessions</p>
+                                <div class="trainer-sessions">
+                                    <% if (typeof upcomingSessions !== 'undefined' && upcomingSessions.length > 0) { %>
+                                        <% upcomingSessions.forEach(session => { %>
+                                            <div class="session-item">
+                                                <div class="session-summary">
+                                                    <div class="session-row">
+                                                        <span class="session-activity"><%= session.activity.name %></span>
+                                                    </div>
+                                                    <div class="session-row">
+                                                        <span class="session-date"><%= new Date(session.session.sessionDate).toLocaleDateString('en-AU') %></span>
+                                                        <span class="session-separator">•</span>
+                                                        <span class="session-time"><%= new Date(session.session.sessionDate).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }) %></span>
+                                                        <span class="session-separator">•</span>
+                                                        <span class="session-location"><%= session.location.name %></span>
+                                                    </div>
+                                                </div>
+                                                <div class="session-actions">
+                                                    <a href="/sessions/<%= session.session.id %>" class="session-link">View Details</a>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <div class="no-events">
+                                            <p>None</p>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                            
+                            <% if (currentUser.role === 'member') { %>
+                                <p class="hero-subtitle">Upcoming Bookings</p>
+                                <div class="member-bookings">
+                                    <% if (typeof upcomingBookings !== 'undefined' && upcomingBookings.length > 0) { %>
+                                        <% upcomingBookings.forEach(booking => { %>
+                                            <div class="booking-item">
+                                                <div class="booking-summary">
+                                                    <div class="booking-row">
+                                                        <span class="booking-activity"><%= booking.activity.name %></span>
+                                                    </div>
+                                                    <div class="booking-row">
+                                                        <span class="booking-date"><%= new Date(booking.session.sessionDate).toLocaleDateString('en-AU') %></span>
+                                                        <span class="booking-separator">•</span>
+                                                        <span class="booking-time"><%= new Date(booking.session.sessionDate).toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' }) %></span>
+                                                        <span class="booking-separator">•</span>
+                                                        <span class="booking-location"><%= booking.location.name %></span>
+                                                    </div>
+                                                </div>
+                                                <div class="booking-actions">
+                                                    <a href="/bookings/<%= booking.booking.id %>" class="booking-link">View Details</a>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <div class="no-events">
+                                            <p>None</p>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="hero-image">
+                            <img src="/img/profile.jpg" alt="High Street Gym Profile" class="hero-img">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <%- include("partials/footer.ejs") %>
+        </main>
+    </body>
+</html>
+
+
