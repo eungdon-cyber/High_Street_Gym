@@ -26,6 +26,7 @@ function BlogListView() {
     const [selectedBlogError, setSelectedBlogError] = useState(null)
     const [deletingBlog, setDeletingBlog] = useState(false)
     const [deleteError, setDeleteError] = useState(null)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
     const location = useLocation()
 
     // Fetches blogs list from backend API
@@ -113,6 +114,17 @@ function BlogListView() {
         setSelectedBlogError(null)
         setDeleteError(null)
         setSelectedBlogLoading(false)
+        setShowDeleteModal(false)
+    }
+
+    // Opens the delete confirmation modal
+    const handleOpenDeleteModal = () => {
+        setShowDeleteModal(true)
+    }
+
+    // Closes the delete confirmation modal
+    const handleCloseDeleteModal = () => {
+        setShowDeleteModal(false)
     }
 
     // Deletes the selected blog post (only by post author)
@@ -121,10 +133,7 @@ function BlogListView() {
             return
         }
 
-        if (!window.confirm("Are you sure you want to delete this blog post? This action cannot be undone.")) {
-            return
-        }
-
+        setShowDeleteModal(false)
         setDeletingBlog(true)
         setDeleteError(null)
 
@@ -371,7 +380,7 @@ function BlogListView() {
                         {/* Delete button: shown only for blog post author, positioned outside and to the right of content */}
                         {user && selectedBlog.authorId === user.id && (
                             <button
-                                onClick={handleDeleteSelectedBlog}
+                                onClick={handleOpenDeleteModal}
                                 disabled={deletingBlog}
                                 className="absolute bottom-4 right-4 text-red-300 hover:text-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 title={deletingBlog ? "Deleting..." : "Delete Post"}
@@ -385,6 +394,54 @@ function BlogListView() {
                                 {deleteError}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Delete Confirmation Modal: shown when user clicks delete button */}
+                {showDeleteModal && selectedBlog && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-[#6a2f6a] border-2 border-[#30d939] rounded-lg p-6 md:p-8 max-w-md w-full shadow-2xl">
+                            {/* Modal header */}
+                            <div className="mb-4">
+                                <h3 className="text-xl font-bold text-[#30d939] mb-2">Confirm Deletion</h3>
+                                <p className="text-white/90">
+                                    Are you sure you want to delete this blog post?
+                                </p>
+                                <p className="text-red-300 text-sm mt-2 font-semibold">
+                                    This action cannot be undone.
+                                </p>
+                            </div>
+                            
+                            {/* Blog post preview */}
+                            <div className="bg-white/10 rounded-lg p-4 mb-6">
+                                <p className="text-white font-semibold mb-1">{selectedBlog.title}</p>
+                                <p className="text-white/70 text-sm">{formatDate(selectedBlog.createdAt)}</p>
+                            </div>
+
+                            {/* Modal action buttons */}
+                            <div className="flex gap-3">
+                                {/* Cancel button */}
+                                <button
+                                    onClick={handleCloseDeleteModal}
+                                    disabled={deletingBlog}
+                                    className="flex-1 bg-white/20 text-white py-3 px-6 rounded-full font-semibold transition-all duration-300 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Cancel
+                                </button>
+                                {/* Confirm delete button */}
+                                <button
+                                    onClick={handleDeleteSelectedBlog}
+                                    disabled={deletingBlog}
+                                    className="flex-1 bg-red-600 text-white py-3 px-6 rounded-full font-semibold transition-all duration-300 hover:bg-red-700 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {deletingBlog ? (
+                                        <span className="loading loading-spinner loading-sm"></span>
+                                    ) : (
+                                        "Delete"
+                                    )}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 

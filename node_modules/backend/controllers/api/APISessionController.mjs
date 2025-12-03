@@ -324,6 +324,19 @@ export class APISessionController {
                 throw dbError;
             }
 
+            // Filter out past sessions (only include active/future sessions)
+            // This matches the filtering used in the sessions list page
+            const currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0); // Set to start of day for fair comparison
+            sessions = sessions.filter(sessionItem => {
+                if (!sessionItem.session || !sessionItem.session.sessionDate) {
+                    return false; // Skip sessions without valid dates
+                }
+                const sessionDate = new Date(sessionItem.session.sessionDate);
+                sessionDate.setHours(0, 0, 0, 0); // Set to start of day for fair comparison
+                return sessionDate >= currentDate; // Keep only future or current day sessions
+            });
+
             // Get trainer details
             const trainer = await UserModel.getById(trainerId);
             if (!trainer) {

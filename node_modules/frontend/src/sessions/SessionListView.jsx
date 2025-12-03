@@ -23,6 +23,7 @@ function SessionListView() {
     const [bookingSelectedSessionError, setBookingSelectedSessionError] = useState(null)
     const [cancelingSelectedSession, setCancelingSelectedSession] = useState(false)
     const [cancelSelectedSessionError, setCancelSelectedSessionError] = useState(null)
+    const [showCancelModal, setShowCancelModal] = useState(false)
     const [selectedSessionGroup, setSelectedSessionGroup] = useState([])
     const [selectedSessionGroupMeta, setSelectedSessionGroupMeta] = useState(null)
 
@@ -49,6 +50,7 @@ function SessionListView() {
         setBookingSelectedSessionError(null)
         setCancelingSelectedSession(false)
         setCancelSelectedSessionError(null)
+        setShowCancelModal(false)
         setSelectedSessionGroup([])
         setSelectedSessionGroupMeta(null)
     }, [showMySessions])
@@ -266,6 +268,7 @@ function SessionListView() {
         setBookingSelectedSessionError(null)
         setCancelingSelectedSession(false)
         setCancelSelectedSessionError(null)
+        setShowCancelModal(false)
         setSelectedSessionGroup([])
         setSelectedSessionGroupMeta(null)
     }
@@ -304,8 +307,8 @@ function SessionListView() {
         }
     }
 
-    // Cancels/deletes a session (trainers and admins only, trainers can only cancel their own)
-    const handleCancelSelectedSession = async () => {
+    // Opens the cancel session confirmation modal
+    const handleOpenCancelModal = () => {
         if (!selectedSession) {
             setCancelSelectedSessionError("Unable to determine session.")
             return
@@ -318,10 +321,22 @@ function SessionListView() {
             setCancelSelectedSessionError("You can only cancel your own sessions.")
             return
         }
-        if (!window.confirm("Cancel this session? This action cannot be undone.")) {
+        setShowCancelModal(true)
+    }
+
+    // Closes the cancel session confirmation modal
+    const handleCloseCancelModal = () => {
+        setShowCancelModal(false)
+    }
+
+    // Cancels/deletes a session (trainers and admins only, trainers can only cancel their own)
+    const handleCancelSelectedSession = async () => {
+        if (!selectedSession) {
+            setCancelSelectedSessionError("Unable to determine session.")
             return
         }
 
+        setShowCancelModal(false)
         setCancelingSelectedSession(true)
         setCancelSelectedSessionError(null)
 
@@ -568,7 +583,7 @@ function SessionListView() {
                                 {/* Cancel/Delete button: shown only for admin or session owner (trainer) */}
                                 {user && (user.role === "trainer" || user.role === "admin") && (user.role === "admin" || selectedSession.trainerId === user.id) && (
                                     <button
-                                        onClick={handleCancelSelectedSession}
+                                        onClick={handleOpenCancelModal}
                                         disabled={cancelingSelectedSession}
                                         className="absolute bottom-4 right-4 text-red-300 hover:text-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         title={cancelingSelectedSession ? "Canceling..." : "Cancel this Session"}
@@ -603,6 +618,66 @@ function SessionListView() {
                                     {cancelSelectedSessionError}
                                 </div>
                             )}
+                        </div>
+                    )}
+
+                    {/* Cancel Session Confirmation Modal: shown when user clicks cancel button */}
+                    {showCancelModal && selectedSession && (
+                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                            <div className="bg-[#6a2f6a] border-2 border-[#30d939] rounded-lg p-6 md:p-8 max-w-md w-full shadow-2xl">
+                                {/* Modal header */}
+                                <div className="mb-4">
+                                    <h3 className="text-xl font-bold text-[#30d939] mb-2">Confirm Cancellation</h3>
+                                    <p className="text-white/90">
+                                        Are you sure you want to cancel this session?
+                                    </p>
+                                    <p className="text-red-300 text-sm mt-2 font-semibold">
+                                        This action cannot be undone.
+                                    </p>
+                                </div>
+                                
+                                {/* Session preview */}
+                                <div className="bg-white/10 rounded-lg p-4 mb-6">
+                                    <p className="text-white font-semibold mb-2">
+                                        {selectedSession.activityName || `Activity #${selectedSession.activityId}`}
+                                    </p>
+                                    <div className="space-y-1 text-sm text-white/80">
+                                        <p>
+                                            <span className="font-semibold">Date:</span> {formatDate(selectedSession.sessionDate)}
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold">Time:</span> {formatTime(selectedSession.sessionTime)}
+                                        </p>
+                                        <p>
+                                            <span className="font-semibold">Location:</span> {selectedSession.locationName || `Location #${selectedSession.locationId}`}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Modal action buttons */}
+                                <div className="flex gap-3">
+                                    {/* Cancel button */}
+                                    <button
+                                        onClick={handleCloseCancelModal}
+                                        disabled={cancelingSelectedSession}
+                                        className="flex-1 bg-white/20 text-white py-3 px-6 rounded-full font-semibold transition-all duration-300 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Keep Session
+                                    </button>
+                                    {/* Confirm cancel button */}
+                                    <button
+                                        onClick={handleCancelSelectedSession}
+                                        disabled={cancelingSelectedSession}
+                                        className="flex-1 bg-red-600 text-white py-3 px-6 rounded-full font-semibold transition-all duration-300 hover:bg-red-700 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {cancelingSelectedSession ? (
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                        ) : (
+                                            "Cancel Session"
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
 

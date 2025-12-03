@@ -32,6 +32,7 @@ function BookingListView() {
     
     const [cancelingSelectedBooking, setCancelingSelectedBooking] = useState(false)
     const [cancelSelectedBookingError, setCancelSelectedBookingError] = useState(null)
+    const [showCancelModal, setShowCancelModal] = useState(false)
     
     const [selectedBookingGroup, setSelectedBookingGroup] = useState([])
     const [selectedBookingGroupMeta, setSelectedBookingGroupMeta] = useState(null)
@@ -364,8 +365,8 @@ function BookingListView() {
         }
     }
 
-    // Cancels/deletes a booking
-    const handleCancelSelectedBooking = async () => {
+    // Opens the cancel booking confirmation modal
+    const handleOpenCancelModal = () => {
         if (!selectedBooking) {
             setCancelSelectedBookingError("Unable to determine booking.")
             return
@@ -382,15 +383,22 @@ function BookingListView() {
             return
         }
 
-        const past = isPastBooking(selectedBooking.sessionDate)
-        const confirmMessage = past
-            ? "Delete this booking from your history?"
-            : "Cancel this upcoming booking?"
+        setShowCancelModal(true)
+    }
 
-        if (!window.confirm(confirmMessage)) {
+    // Closes the cancel booking confirmation modal
+    const handleCloseCancelModal = () => {
+        setShowCancelModal(false)
+    }
+
+    // Cancels/deletes a booking
+    const handleCancelSelectedBooking = async () => {
+        if (!selectedBooking) {
+            setCancelSelectedBookingError("Unable to determine booking.")
             return
         }
 
+        setShowCancelModal(false)
         setCancelingSelectedBooking(true)
         setCancelSelectedBookingError(null)
 
@@ -604,7 +612,7 @@ function BookingListView() {
                                 {/* Cancel/Delete button: shown only for admin or booking owner */}
                                 {user && (user.role === "admin" || (user.role === "member" && selectedBooking.memberId == user.id)) && (
                                     <button
-                                        onClick={handleCancelSelectedBooking}
+                                        onClick={handleOpenCancelModal}
                                         disabled={cancelingSelectedBooking}
                                         className="absolute bottom-4 right-4 text-red-300 hover:text-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         title={cancelingSelectedBooking
@@ -639,6 +647,74 @@ function BookingListView() {
                             )}
                         </div>
                     )}
+
+                    {/* Cancel Booking Confirmation Modal: shown when user clicks cancel button */}
+                    {showCancelModal && selectedBooking && (() => {
+                        const past = isPastBooking(selectedBooking.sessionDate)
+                        return (
+                            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-[#6a2f6a] border-2 border-[#30d939] rounded-lg p-6 md:p-8 max-w-md w-full shadow-2xl">
+                                    {/* Modal header */}
+                                    <div className="mb-4">
+                                        <h3 className="text-xl font-bold text-[#30d939] mb-2">
+                                            {past ? "Confirm Deletion" : "Confirm Cancellation"}
+                                        </h3>
+                                        <p className="text-white/90">
+                                            {past 
+                                                ? "Are you sure you want to delete this booking from your history?"
+                                                : "Are you sure you want to cancel this upcoming booking?"
+                                            }
+                                        </p>
+                                        <p className="text-red-300 text-sm mt-2 font-semibold">
+                                            This action cannot be undone.
+                                        </p>
+                                    </div>
+                                    
+                                    {/* Booking preview */}
+                                    <div className="bg-white/10 rounded-lg p-4 mb-6">
+                                        <p className="text-white font-semibold mb-2">
+                                            {selectedBooking.activityName || `Activity #${selectedBooking.activityId}`}
+                                        </p>
+                                        <div className="space-y-1 text-sm text-white/80">
+                                            <p>
+                                                <span className="font-semibold">Date:</span> {formatDate(selectedBooking.sessionDate)}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold">Time:</span> {formatTime(selectedBooking.sessionTime)}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold">Location:</span> {selectedBooking.locationName || `Location #${selectedBooking.locationId}`}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Modal action buttons */}
+                                    <div className="flex gap-3">
+                                        {/* Cancel button */}
+                                        <button
+                                            onClick={handleCloseCancelModal}
+                                            disabled={cancelingSelectedBooking}
+                                            className="flex-1 bg-white/20 text-white py-3 px-6 rounded-full font-semibold transition-all duration-300 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Keep Booking
+                                        </button>
+                                        {/* Confirm cancel/delete button */}
+                                        <button
+                                            onClick={handleCancelSelectedBooking}
+                                            disabled={cancelingSelectedBooking}
+                                            className="flex-1 bg-red-600 text-white py-3 px-6 rounded-full font-semibold transition-all duration-300 hover:bg-red-700 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {cancelingSelectedBooking ? (
+                                                <span className="loading loading-spinner loading-sm"></span>
+                                            ) : (
+                                                past ? "Delete" : "Cancel"
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })()}
 
                     {/* Bookings list error message: displays if fetching bookings fails */}
                     {error && (
