@@ -57,8 +57,19 @@ function BookingListView() {
         }
     }, [searchParams, activeTab])
 
+    // Checks if booking date is in the past
+    const isPastBooking = (sessionDate) => {
+        if (!sessionDate) return false
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const bookingDate = new Date(sessionDate)
+        bookingDate.setHours(0, 0, 0, 0)
+        return bookingDate < today
+    }
+
     // Fetches bookings list from backend API
     // Endpoint varies by activeTab: "previous" includes past bookings, "active" only future
+    // Client-side filtering applied for "previous" tab to show only past bookings
     const getBookings = useCallback(async () => {
         if (!isAuthorized) {
             setLoading(false)
@@ -74,7 +85,12 @@ function BookingListView() {
             const response = await fetchAPI("GET", route, null, authKey)
             
             if (response.status === 200) {
-                const bookingsData = response.body || []
+                let bookingsData = response.body || []
+                
+                // Filter to show only past bookings when "Previous" tab is active
+                if (activeTab === "previous") {
+                    bookingsData = bookingsData.filter(booking => isPastBooking(booking.sessionDate))
+                }
                 
                 if (bookingsData.length > 0) {
                     setBookings(bookingsData)
@@ -269,16 +285,6 @@ function BookingListView() {
         } catch {
             return timeString
         }
-    }
-
-    // Checks if booking date is in the past
-    const isPastBooking = (sessionDate) => {
-        if (!sessionDate) return false
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const bookingDate = new Date(sessionDate)
-        bookingDate.setHours(0, 0, 0, 0)
-        return bookingDate < today
     }
 
     // Formats month/year from year-month key for display

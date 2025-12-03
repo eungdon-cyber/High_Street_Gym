@@ -368,30 +368,6 @@ export class APISessionController {
      * @returns {string} XML content
      */
     static generateSessionsXML(sessions, trainer, startDate, endDate) {
-        // Create period description based on available dates
-        let periodDescription = "";
-        if (startDate && endDate) {
-            periodDescription = `        <period>
-            <start>${startDate}</start>
-            <end>${endDate}</end>
-        </period>`;
-        } else if (startDate) {
-            periodDescription = `        <period>
-            <start>${startDate}</start>
-            <end>No end date specified</end>
-        </period>`;
-        } else if (endDate) {
-            periodDescription = `        <period>
-            <start>No start date specified</start>
-            <end>${endDate}</end>
-        </period>`;
-        } else {
-            periodDescription = `        <period>
-            <start>All future sessions</start>
-            <end>No date range specified</end>
-        </period>`;
-        }
-
         // Format exported_at timestamp in YYYY-MM-DD HH:mm:ss format
         const now = new Date();
         const year = now.getFullYear();
@@ -402,29 +378,32 @@ export class APISessionController {
         const seconds = String(now.getSeconds()).padStart(2, '0');
         const exportedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
-        // DTD definition matching the structure
+        // DTD definition matching the updated structure from diagram
         const dtd = `<!DOCTYPE weekly_sessions [
     <!ELEMENT weekly_sessions (header, week*)>
-    <!ATTLIST weekly_sessions export-date CDATA #IMPLIED>
-    <!ELEMENT header (title, period, trainer, exported_at, total_sessions)>
+    <!ELEMENT header (title, exported_at, total_sessions, period, trainer)>
     <!ELEMENT title (#PCDATA)>
+    <!ELEMENT exported_at (#PCDATA)>
+    <!ELEMENT total_sessions (#PCDATA)>
     <!ELEMENT period (start, end)>
     <!ELEMENT start (#PCDATA)>
     <!ELEMENT end (#PCDATA)>
-    <!ELEMENT trainer (name, email)>
+    <!ELEMENT trainer (name, email, id)>
     <!ELEMENT name (#PCDATA)>
     <!ELEMENT email (#PCDATA)>
-    <!ELEMENT exported_at (#PCDATA)>
-    <!ELEMENT total_sessions (#PCDATA)>
+    <!ELEMENT id (#PCDATA)>
     <!ELEMENT week (session*)>
     <!ATTLIST week start CDATA #IMPLIED>
     <!ATTLIST week end CDATA #IMPLIED>
     <!ATTLIST week label CDATA #IMPLIED>
-    <!ELEMENT session (id, title, location, start, end, activity, location_details)>
-    <!ELEMENT id (#PCDATA)>
-    <!ELEMENT location (#PCDATA)>
-    <!ELEMENT activity (name)>
-    <!ELEMENT location_details (name)>
+    <!ELEMENT session (session_date, session_time, datetime, id, activity, location)>
+    <!ELEMENT session_date (#PCDATA)>
+    <!ELEMENT session_time (#PCDATA)>
+    <!ELEMENT datetime (#PCDATA)>
+    <!ELEMENT activity (name, description, id)>
+    <!ELEMENT description (#PCDATA)>
+    <!ELEMENT location (name, address, id)>
+    <!ELEMENT address (#PCDATA)>
 ]>`;
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -432,14 +411,8 @@ ${dtd}
 <weekly_sessions>
     <header>
         <title>Sessions - ${trainer.firstName} ${trainer.lastName}</title>
-${periodDescription}
-        <trainer>
-            <name>${trainer.firstName} ${trainer.lastName}</name>
-            <email>${trainer.email}</email>
-        </trainer>
         <exported_at>${exportedAt}</exported_at>
-        <total_sessions>${sessions.length}</total_sessions>
-    </header>`;
+        <total_sessions>${sessions.length}</total_sessions>`;
 
         const formatLocalDateTime = (date) => {
             if (!date || isNaN(date.getTime())) {
@@ -466,21 +439,23 @@ ${periodDescription}
 
             const eventId = `session_${session.id}`;
             const sessionDateTime = new Date(`${session.sessionDate}T${session.sessionTime}`);
-            const endDateTime = new Date(sessionDateTime.getTime() + (60 * 60 * 1000));
 
             return `
         <session>
+            <session_date>${session.sessionDate}</session_date>
+            <session_time>${session.sessionTime}</session_time>
+            <datetime>${formatLocalDateTime(sessionDateTime)}</datetime>
             <id>${eventId}</id>
-            <title>${APISessionController.escapeXML(activity.name || 'Unknown Activity')}</title>
-            <location>${APISessionController.escapeXML(location.name || 'Unknown Location')}</location>
-            <start>${formatLocalDateTime(sessionDateTime)}</start>
-            <end>${formatLocalDateTime(endDateTime)}</end>
             <activity>
                 <name>${APISessionController.escapeXML(activity.name || 'Unknown Activity')}</name>
+                <description>${APISessionController.escapeXML(activity.description || '')}</description>
+                <id>${activity.id}</id>
             </activity>
-            <location_details>
+            <location>
                 <name>${APISessionController.escapeXML(location.name || 'Unknown Location')}</name>
-            </location_details>
+                <address>${APISessionController.escapeXML(location.address || '')}</address>
+                <id>${location.id}</id>
+            </location>
         </session>`;
         };
 
@@ -532,6 +507,27 @@ ${periodDescription}
             }
             return a.range.startISO.localeCompare(b.range.startISO);
         });
+
+        // Calculate period start/end from first week's start and last week's end
+        let periodStart = 'No sessions available';
+        let periodEnd = 'No sessions available';
+        if (weekEntries.length > 0) {
+            periodStart = weekEntries[0].range.startISO; // First week's start date
+            periodEnd = weekEntries[weekEntries.length - 1].range.endISO; // Last week's end date
+        }
+
+        // Add period to header
+        xml += `
+        <period>
+            <start>${periodStart}</start>
+            <end>${periodEnd}</end>
+        </period>
+        <trainer>
+            <name>${trainer.firstName} ${trainer.lastName}</name>
+            <email>${trainer.email}</email>
+            <id>${trainer.id}</id>
+        </trainer>
+    </header>`;
 
         // Add week elements directly under weekly_sessions (matching DTD structure)
         if (weekEntries.length > 0) {

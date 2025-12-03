@@ -399,6 +399,20 @@ export class APIBookingController {
                 });
             }
 
+            // Sort bookings chronologically by session date and time
+            // Handles missing/invalid dates by placing them at the end
+            bookings.sort((a, b) => {
+                const dateA = new Date(`${a.session?.sessionDate || ''}T${a.session?.sessionTime || ''}`);
+                const dateB = new Date(`${b.session?.sessionDate || ''}T${b.session?.sessionTime || ''}`);
+                
+                // If either date is invalid, handle edge cases
+                if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
+                if (isNaN(dateA.getTime())) return 1; // Invalid dates go to end
+                if (isNaN(dateB.getTime())) return -1;
+                
+                return dateA - dateB; // Ascending order (oldest first)
+            });
+
             // Generate XML content
             const xmlContent = APIBookingController.generateBookingsXML(bookings, req.authenticatedUser);
 
@@ -428,106 +442,207 @@ export class APIBookingController {
      * @returns {string} XML content
      */
     static generateBookingsXML(bookings, user) {
-        // Format exported_at timestamp in M/D/YYYY H:MM:SS AM/PM format (matching example)
+        // Format exported_at timestamp in YYYY-MM-DD HH:mm:ss format (matching sessions format)
         const now = new Date();
-        const month = now.getMonth() + 1;
-        const day = now.getDate();
         const year = now.getFullYear();
-        let hours = now.getHours();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // 0 should be 12
-        const exportedAt = `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
+        const exportedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
-        // DTD definition matching the structure in frontend/doc/bookings_history.xml
+        // DTD definition matching the updated structure from diagram
         const dtd = `<!DOCTYPE booking_history [
-    <!ELEMENT booking_history (header, bookings)>
-    <!ELEMENT header (title, member, exported_at, total_bookings)>
+    <!ELEMENT booking_history (header, week*)>
+    <!ELEMENT header (title, exported_at, total_bookings, period, member)>
     <!ELEMENT title (#PCDATA)>
-    <!ELEMENT member (name, email, role)>
-    <!ELEMENT name (#PCDATA)>
-    <!ELEMENT email (#PCDATA)>
-    <!ELEMENT role (#PCDATA)>
     <!ELEMENT exported_at (#PCDATA)>
     <!ELEMENT total_bookings (#PCDATA)>
-    <!ELEMENT bookings (booking*)>
-    <!ELEMENT booking (id, booking_date, session, activity, location, trainer)>
+    <!ELEMENT period (start, end)>
+    <!ELEMENT start (#PCDATA)>
+    <!ELEMENT end (#PCDATA)>
+    <!ELEMENT member (name, email, id)>
+    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT email (#PCDATA)>
     <!ELEMENT id (#PCDATA)>
+    <!ELEMENT week (booking*)>
+    <!ATTLIST week start CDATA #IMPLIED>
+    <!ATTLIST week end CDATA #IMPLIED>
+    <!ATTLIST week period_label CDATA #IMPLIED>
+    <!ELEMENT booking (booking_date, booking_time, datetime, activity, location, trainer, booking_id, session_id)>
     <!ELEMENT booking_date (#PCDATA)>
-    <!ELEMENT session (id, date, time, datetime)>
-    <!ELEMENT date (#PCDATA)>
-    <!ELEMENT time (#PCDATA)>
+    <!ELEMENT booking_time (#PCDATA)>
     <!ELEMENT datetime (#PCDATA)>
-    <!ELEMENT activity (name, description)>
+    <!ELEMENT activity (name, description, id)>
     <!ELEMENT description (#PCDATA)>
-    <!ELEMENT location (name, address)>
+    <!ELEMENT location (name, address, id)>
     <!ELEMENT address (#PCDATA)>
-    <!ELEMENT trainer (name, email)>
+    <!ELEMENT trainer (name, email, id)>
+    <!ELEMENT booking_id (#PCDATA)>
+    <!ELEMENT session_id (#PCDATA)>
 ]>`;
+
+        // Format datetime in ISO 8601 format without milliseconds/timezone
+        const formatLocalDateTime = (date) => {
+            if (!date || isNaN(date.getTime())) {
+                return '';
+            }
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+        };
+
+        // Helper function to get week range for a date (Monday to Sunday)
+        const getWeekRange = (dateString) => {
+            if (!dateString) return null;
+            const date = new Date(`${dateString}T00:00:00`);
+            if (isNaN(date.getTime())) return null;
+            const day = date.getDay(); // 0 (Sun) - 6 (Sat)
+            const diffToMonday = day === 0 ? -6 : 1 - day; // Monday as first day
+            const monday = new Date(date);
+            monday.setDate(date.getDate() + diffToMonday);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+
+            const formatISODate = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const dayNum = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${dayNum}`;
+            };
+            const formatDisplayDate = (d) => {
+                const dayNum = String(d.getDate()).padStart(2, '0');
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const year = d.getFullYear();
+                return `${dayNum}/${month}/${year}`;
+            };
+
+            return {
+                key: `${formatISODate(monday)}_${formatISODate(sunday)}`,
+                startISO: formatISODate(monday),
+                endISO: formatISODate(sunday),
+                label: `${formatDisplayDate(monday)} - ${formatDisplayDate(sunday)}`
+            };
+        };
+
+        // Group bookings by week
+        const weekGroups = new Map();
+        bookings.forEach(bookingItem => {
+            const session = bookingItem.session;
+            if (!session || !session.sessionDate) return;
+            
+            const range = getWeekRange(session.sessionDate);
+            if (!range) return;
+            
+            if (!weekGroups.has(range.key)) {
+                weekGroups.set(range.key, { range, bookings: [] });
+            }
+            weekGroups.get(range.key).bookings.push(bookingItem);
+        });
+
+        // Sort week entries chronologically
+        const weekEntries = Array.from(weekGroups.values()).sort((a, b) => {
+            if (a.range.startISO === b.range.startISO) {
+                return a.range.endISO.localeCompare(b.range.endISO);
+            }
+            return a.range.startISO.localeCompare(b.range.startISO);
+        });
+
+        // Calculate period start/end from first week's start and last week's end
+        let periodStart = 'No bookings available';
+        let periodEnd = 'No bookings available';
+        if (weekEntries.length > 0) {
+            periodStart = weekEntries[0].range.startISO;
+            periodEnd = weekEntries[weekEntries.length - 1].range.endISO;
+        }
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
 ${dtd}
 <booking_history>
     <header>
         <title>Booking History - ${user.firstName} ${user.lastName}</title>
+        <exported_at>${exportedAt}</exported_at>
+        <total_bookings>${bookings.length}</total_bookings>
+        <period>
+            <start>${periodStart}</start>
+            <end>${periodEnd}</end>
+        </period>
         <member>
             <name>${user.firstName} ${user.lastName}</name>
             <email>${user.email}</email>
-            <role>${user.role}</role>
+            <id>${user.id}</id>
         </member>
-        <exported_at>${exportedAt}</exported_at>
-        <total_bookings>${bookings.length}</total_bookings>
-    </header>
-    <bookings>`;
+    </header>`;
 
-        bookings.forEach(bookingItem => {
+        // Render a single booking
+        const renderBooking = (bookingItem) => {
             const booking = bookingItem.booking;
             const session = bookingItem.session;
             const activity = bookingItem.activity;
             const location = bookingItem.location;
-            const trainer = bookingItem.trainer; // Use the trainer from the session, not the user (member)
+            const trainer = bookingItem.trainer;
             
             // Skip if required data is missing
             if (!booking || !session || !activity || !location || !trainer) {
                 console.warn("Skipping booking due to missing data:", bookingItem);
-                return;
+                return "";
             }
             
-            // Create a unique booking ID
             const bookingId = `booking_${booking.id}`;
-            
-            // Format date and time
+            const sessionId = `session_${session.id}`;
             const sessionDateTime = new Date(`${session.sessionDate}T${session.sessionTime}`);
             
-            xml += `
+            return `
         <booking>
-            <id>${bookingId}</id>
-            <booking_date>${booking.createdAt || 'N/A'}</booking_date>
-            <session>
-                <id>session_${session.id}</id>
-                <date>${session.sessionDate}</date>
-                <time>${session.sessionTime}</time>
-                <datetime>${sessionDateTime.toISOString()}</datetime>
-            </session>
+            <booking_date>${session.sessionDate || 'N/A'}</booking_date>
+            <booking_time>${session.sessionTime || 'N/A'}</booking_time>
+            <datetime>${formatLocalDateTime(sessionDateTime)}</datetime>
             <activity>
                 <name>${APIBookingController.escapeXML(activity.name || 'Unknown Activity')}</name>
                 <description>${APIBookingController.escapeXML(activity.description || '')}</description>
+                <id>${activity.id}</id>
             </activity>
             <location>
                 <name>${APIBookingController.escapeXML(location.name || 'Unknown Location')}</name>
                 <address>${APIBookingController.escapeXML(location.address || '')}</address>
+                <id>${location.id}</id>
             </location>
             <trainer>
                 <name>${APIBookingController.escapeXML(trainer.firstName || '')} ${APIBookingController.escapeXML(trainer.lastName || '')}</name>
                 <email>${APIBookingController.escapeXML(trainer.email || '')}</email>
+                <id>${trainer.id}</id>
             </trainer>
+            <booking_id>${bookingId}</booking_id>
+            <session_id>${sessionId}</session_id>
         </booking>`;
-        });
+        };
+
+        // Add week elements with bookings
+        if (weekEntries.length > 0) {
+            weekEntries.forEach(({ range, bookings: bookingsInWeek }) => {
+                // Sort bookings within week by date and time
+                bookingsInWeek.sort((a, b) => {
+                    const dateA = new Date(`${a.session?.sessionDate || ''}T${a.session?.sessionTime || ''}`);
+                    const dateB = new Date(`${b.session?.sessionDate || ''}T${b.session?.sessionTime || ''}`);
+                    if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
+                    if (isNaN(dateA.getTime())) return 1;
+                    if (isNaN(dateB.getTime())) return -1;
+                    return dateA - dateB;
+                });
+
+                xml += `
+    <week start="${range.startISO}" end="${range.endISO}" period_label="${range.label}">
+${bookingsInWeek.map(renderBooking).join("")}
+    </week>`;
+            });
+        }
 
         xml += `
-    </bookings>
 </booking_history>`;
 
         return xml;
