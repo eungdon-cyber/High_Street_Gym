@@ -371,39 +371,75 @@ export class APISessionController {
         // Create period description based on available dates
         let periodDescription = "";
         if (startDate && endDate) {
-            periodDescription = `<period>
-                <start>${startDate}</start>
-                <end>${endDate}</end>
-            </period>`;
+            periodDescription = `        <period>
+            <start>${startDate}</start>
+            <end>${endDate}</end>
+        </period>`;
         } else if (startDate) {
-            periodDescription = `<period>
-                <start>${startDate}</start>
-                <end>No end date specified</end>
-            </period>`;
+            periodDescription = `        <period>
+            <start>${startDate}</start>
+            <end>No end date specified</end>
+        </period>`;
         } else if (endDate) {
-            periodDescription = `<period>
-                <start>No start date specified</start>
-                <end>${endDate}</end>
-            </period>`;
+            periodDescription = `        <period>
+            <start>No start date specified</start>
+            <end>${endDate}</end>
+        </period>`;
         } else {
-            periodDescription = `<period>
-                <start>All future sessions</start>
-                <end>No date range specified</end>
-            </period>`;
+            periodDescription = `        <period>
+            <start>All future sessions</start>
+            <end>No date range specified</end>
+        </period>`;
         }
 
+        // Format exported_at timestamp in YYYY-MM-DD HH:mm:ss format
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const exportedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+
+        // DTD definition matching the structure
+        const dtd = `<!DOCTYPE weekly_sessions [
+    <!ELEMENT weekly_sessions (header, week*)>
+    <!ATTLIST weekly_sessions export-date CDATA #IMPLIED>
+    <!ELEMENT header (title, period, trainer, exported_at, total_sessions)>
+    <!ELEMENT title (#PCDATA)>
+    <!ELEMENT period (start, end)>
+    <!ELEMENT start (#PCDATA)>
+    <!ELEMENT end (#PCDATA)>
+    <!ELEMENT trainer (name, email)>
+    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT email (#PCDATA)>
+    <!ELEMENT exported_at (#PCDATA)>
+    <!ELEMENT total_sessions (#PCDATA)>
+    <!ELEMENT week (session*)>
+    <!ATTLIST week start CDATA #IMPLIED>
+    <!ATTLIST week end CDATA #IMPLIED>
+    <!ATTLIST week label CDATA #IMPLIED>
+    <!ELEMENT session (id, title, location, start, end, activity, location_details)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT location (#PCDATA)>
+    <!ELEMENT activity (name)>
+    <!ELEMENT location_details (name)>
+]>`;
+
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
-    <weekly_sessions>
-        <header>
-            <title>Sessions - ${trainer.firstName} ${trainer.lastName}</title>
-            ${periodDescription}
-            <trainer>
-                <name>${trainer.firstName} ${trainer.lastName}</name>
-                <email>${trainer.email}</email>
-            </trainer>
-            <exported>${new Date().toLocaleString('en-AU', { timeZone: 'Australia/Brisbane' }).replace(',', '')}</exported>
-            <total_sessions>${sessions.length}</total_sessions>
-        </header>`;
+${dtd}
+<weekly_sessions>
+    <header>
+        <title>Sessions - ${trainer.firstName} ${trainer.lastName}</title>
+${periodDescription}
+        <trainer>
+            <name>${trainer.firstName} ${trainer.lastName}</name>
+            <email>${trainer.email}</email>
+        </trainer>
+        <exported_at>${exportedAt}</exported_at>
+        <total_sessions>${sessions.length}</total_sessions>
+    </header>`;
 
         const formatLocalDateTime = (date) => {
             if (!date || isNaN(date.getTime())) {
@@ -433,19 +469,19 @@ export class APISessionController {
             const endDateTime = new Date(sessionDateTime.getTime() + (60 * 60 * 1000));
 
             return `
-            <session>
-                <id>${eventId}</id>
-                <title>${APISessionController.escapeXML(activity.name || 'Unknown Activity')}</title>
-                <location>${APISessionController.escapeXML(location.name || 'Unknown Location')}</location>
-                <start>${formatLocalDateTime(sessionDateTime)}</start>
-                <end>${formatLocalDateTime(endDateTime)}</end>
-                <activity>
-                    <name>${APISessionController.escapeXML(activity.name || 'Unknown Activity')}</name>
-                </activity>
-                <location_details>
-                    <name>${APISessionController.escapeXML(location.name || 'Unknown Location')}</name>
-                </location_details>
-            </session>`;
+        <session>
+            <id>${eventId}</id>
+            <title>${APISessionController.escapeXML(activity.name || 'Unknown Activity')}</title>
+            <location>${APISessionController.escapeXML(location.name || 'Unknown Location')}</location>
+            <start>${formatLocalDateTime(sessionDateTime)}</start>
+            <end>${formatLocalDateTime(endDateTime)}</end>
+            <activity>
+                <name>${APISessionController.escapeXML(activity.name || 'Unknown Activity')}</name>
+            </activity>
+            <location_details>
+                <name>${APISessionController.escapeXML(location.name || 'Unknown Location')}</name>
+            </location_details>
+        </session>`;
         };
 
         const getWeekRange = (dateString) => {
@@ -497,25 +533,18 @@ export class APISessionController {
             return a.range.startISO.localeCompare(b.range.startISO);
         });
 
-        const multipleWeeks = weekEntries.length > 1;
-
-        xml += `
-        <sessions>`;
-
-        if (multipleWeeks) {
+        // Add week elements directly under weekly_sessions (matching DTD structure)
+        if (weekEntries.length > 0) {
             weekEntries.forEach(({ range, sessions: sessionsInWeek }) => {
                 xml += `
-            <week start="${range.startISO}" end="${range.endISO}" label="${range.label}">
-                ${sessionsInWeek.map(renderSession).join("")}
-            </week>`;
+    <week start="${range.startISO}" end="${range.endISO}" label="${range.label}">
+${sessionsInWeek.map(renderSession).join("")}
+    </week>`;
             });
-        } else {
-            xml += sessions.map(renderSession).join("");
         }
 
         xml += `
-        </sessions>
-    </weekly_sessions>`;
+</weekly_sessions>`;
 
         return xml;
     }

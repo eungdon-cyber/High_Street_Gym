@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { FaSearch, FaInfoCircle, FaTrash } from "react-icons/fa"
+import { FaSearch, FaInfoCircle, FaTrash, FaDownload } from "react-icons/fa"
 // API utilities for backend communication
 import { fetchAPI, API_BASE_URL } from "../services/api.mjs"
 // React Router hooks for navigation and URL params
@@ -439,15 +439,16 @@ function SessionListView() {
                                     <button
                                         onClick={handleExportWeeklySessions}
                                         disabled={exportingWeekly}
-                                        className="btn w-full md:w-auto bg-[#30d939] text-[#6a2f6a] border-[#30d939] hover:bg-[#30d939]/80 hover:border-[#30d939]/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="w-full py-3 px-6 rounded-full font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 bg-[#30d939] text-[#6a2f6a] border-2 border-[#30d939] hover:bg-[#30d939]/80 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        {exportingWeekly ? "Exporting..." : "Export Weekly Sessions"}
+                                        <FaDownload />
+                                        <span>{exportingWeekly ? "Exporting..." : "Export as XML"}</span>
                                     </button>
                                 </div>
                             </div>
                             {/* Export error message: displays if export operation fails */}
                             {exportWeeklyError && (
-                                <div className="bg-red-500/20 border border-red-500 text-white px-3 py-2 rounded text-sm">
+                                <div className="mt-4 bg-red-500/20 border border-red-500 text-white p-3 rounded-lg text-sm text-center">
                                     {exportWeeklyError}
                                 </div>
                             )}

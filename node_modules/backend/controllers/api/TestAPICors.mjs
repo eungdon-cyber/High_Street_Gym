@@ -11,7 +11,7 @@
 // ============================================================================
 
 // Update this with a valid authentication key (get from POST /api/login)
-const AUTH_KEY = 'ffcf70ea-b8d1-4868-ab02-c0af4b228885';
+const AUTH_KEY = '47e352d-7478-4f28-96ed-7e9113f72d31';
 const BASE_URL = 'http://localhost:8080/api';
 
 // ============================================================================
@@ -131,6 +131,28 @@ const BASE_URL = 'http://localhost:8080/api';
   console.log('📊 MySQL Data Updated:', data);
   console.log('📋 Check Network tab for OPTIONS preflight request');
 })().catch(err => console.error('❌ PUT /api/users/self - CORS Failed:', err.message));
+
+// Test 5-1: PATCH /api/users/self - Partially update current authenticated user
+(async () => {
+  const response = await fetch(`${BASE_URL}/users/self`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-auth-key': AUTH_KEY,
+      'x-test-header': 'cors-test' // Custom header triggers preflight
+    },
+    body: JSON.stringify({ firstName: 'Patched', lastName: 'User' })
+  });
+  const data = await response.json();
+  console.log('✅ PATCH /api/users/self - CORS Success!');
+  console.log('Status:', response.status);
+  console.log('CORS Headers:', {
+    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods')
+  });
+  console.log('📊 MySQL Data Updated:', data);
+  console.log('📋 Check Network tab for OPTIONS preflight request');
+})().catch(err => console.error('❌ PATCH /api/users/self - CORS Failed:', err.message));
 
 // ============================================================================
 // BLOG ENDPOINTS

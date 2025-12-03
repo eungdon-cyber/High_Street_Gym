@@ -428,19 +428,59 @@ export class APIBookingController {
      * @returns {string} XML content
      */
     static generateBookingsXML(bookings, user) {
+        // Format exported_at timestamp in M/D/YYYY H:MM:SS AM/PM format (matching example)
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        const year = now.getFullYear();
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 should be 12
+        const exportedAt = `${month}/${day}/${year} ${hours}:${minutes}:${seconds} ${ampm}`;
+
+        // DTD definition matching the structure in frontend/doc/bookings_history.xml
+        const dtd = `<!DOCTYPE booking_history [
+    <!ELEMENT booking_history (header, bookings)>
+    <!ELEMENT header (title, member, exported_at, total_bookings)>
+    <!ELEMENT title (#PCDATA)>
+    <!ELEMENT member (name, email, role)>
+    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT email (#PCDATA)>
+    <!ELEMENT role (#PCDATA)>
+    <!ELEMENT exported_at (#PCDATA)>
+    <!ELEMENT total_bookings (#PCDATA)>
+    <!ELEMENT bookings (booking*)>
+    <!ELEMENT booking (id, booking_date, session, activity, location, trainer)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT booking_date (#PCDATA)>
+    <!ELEMENT session (id, date, time, datetime)>
+    <!ELEMENT date (#PCDATA)>
+    <!ELEMENT time (#PCDATA)>
+    <!ELEMENT datetime (#PCDATA)>
+    <!ELEMENT activity (name, description)>
+    <!ELEMENT description (#PCDATA)>
+    <!ELEMENT location (name, address)>
+    <!ELEMENT address (#PCDATA)>
+    <!ELEMENT trainer (name, email)>
+]>`;
+
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
-    <booking_history>
-        <header>
-            <title>Booking History - ${user.firstName} ${user.lastName}</title>
-            <member>
-                <name>${user.firstName} ${user.lastName}</name>
-                <email>${user.email}</email>
-                <role>${user.role}</role>
-            </member>
-            <exported_at>${new Date().toLocaleString('en-AU', { timeZone: 'Australia/Brisbane' }).replace(',', '')}</exported_at>
-            <total_bookings>${bookings.length}</total_bookings>
-        </header>
-        <bookings>`;
+${dtd}
+<booking_history>
+    <header>
+        <title>Booking History - ${user.firstName} ${user.lastName}</title>
+        <member>
+            <name>${user.firstName} ${user.lastName}</name>
+            <email>${user.email}</email>
+            <role>${user.role}</role>
+        </member>
+        <exported_at>${exportedAt}</exported_at>
+        <total_bookings>${bookings.length}</total_bookings>
+    </header>
+    <bookings>`;
 
         bookings.forEach(bookingItem => {
             const booking = bookingItem.booking;
@@ -462,33 +502,33 @@ export class APIBookingController {
             const sessionDateTime = new Date(`${session.sessionDate}T${session.sessionTime}`);
             
             xml += `
-            <booking>
-                <id>${bookingId}</id>
-                <booking_date>${booking.createdAt || 'N/A'}</booking_date>
-                <session>
-                    <id>session_${session.id}</id>
-                    <date>${session.sessionDate}</date>
-                    <time>${session.sessionTime}</time>
-                    <datetime>${sessionDateTime.toISOString()}</datetime>
-                </session>
-                <activity>
-                    <name>${APIBookingController.escapeXML(activity.name || 'Unknown Activity')}</name>
-                    <description>${APIBookingController.escapeXML(activity.description || '')}</description>
-                </activity>
-                <location>
-                    <name>${APIBookingController.escapeXML(location.name || 'Unknown Location')}</name>
-                    <address>${APIBookingController.escapeXML(location.address || '')}</address>
-                </location>
-                <trainer>
-                    <name>${APIBookingController.escapeXML(trainer.firstName || '')} ${APIBookingController.escapeXML(trainer.lastName || '')}</name>
-                    <email>${APIBookingController.escapeXML(trainer.email || '')}</email>
-                </trainer>
-            </booking>`;
+        <booking>
+            <id>${bookingId}</id>
+            <booking_date>${booking.createdAt || 'N/A'}</booking_date>
+            <session>
+                <id>session_${session.id}</id>
+                <date>${session.sessionDate}</date>
+                <time>${session.sessionTime}</time>
+                <datetime>${sessionDateTime.toISOString()}</datetime>
+            </session>
+            <activity>
+                <name>${APIBookingController.escapeXML(activity.name || 'Unknown Activity')}</name>
+                <description>${APIBookingController.escapeXML(activity.description || '')}</description>
+            </activity>
+            <location>
+                <name>${APIBookingController.escapeXML(location.name || 'Unknown Location')}</name>
+                <address>${APIBookingController.escapeXML(location.address || '')}</address>
+            </location>
+            <trainer>
+                <name>${APIBookingController.escapeXML(trainer.firstName || '')} ${APIBookingController.escapeXML(trainer.lastName || '')}</name>
+                <email>${APIBookingController.escapeXML(trainer.email || '')}</email>
+            </trainer>
+        </booking>`;
         });
 
         xml += `
-        </bookings>
-    </booking_history>`;
+    </bookings>
+</booking_history>`;
 
         return xml;
     }
