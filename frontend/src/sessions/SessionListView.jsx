@@ -61,6 +61,14 @@ function SessionListView() {
         setLoading(true)
         setError(null)
         
+        // Show warning if guest tries to access My Sessions
+        if (showMySessions && (!user || (user.role !== "trainer" && user.role !== "admin"))) {
+            setError("Access denied: My Sessions is only available to trainers and administrators.")
+            setSessions([])
+            setLoading(false)
+            return
+        }
+        
         try {
             const route = showMySessions ? "/sessions/self" : "/sessions"
             const authKey = showMySessions ? localStorage.getItem("authKey") : null
@@ -87,7 +95,7 @@ function SessionListView() {
         } finally {
             setLoading(false)
         }
-    }, [showMySessions])
+    }, [showMySessions, user])
 
     useEffect(() => {
         getSessions()

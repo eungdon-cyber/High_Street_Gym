@@ -4,6 +4,7 @@ import { SessionActivityLocationUserModel } from "../../models/SessionActivityLo
 import { UserModel } from "../../models/UserModel.mjs";
 import { SessionController } from "../SessionController.mjs";
 import { APIAuthenticationController } from "./APIAuthenticationController.mjs";
+import { exportXML, getWeekRange } from "../../utils/xmlExport.mjs";
 
 export class APISessionController {
     static routes = express.Router();
@@ -357,11 +358,8 @@ export class APISessionController {
             }
             filename += ".xml";
 
-            // Set response headers for XML download
-            res.setHeader('Content-Type', 'application/xml');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            
-            res.send(xmlContent);
+            // Export XML with backup
+            exportXML(res, xmlContent, filename);
         } catch (error) {
             console.error("Error exporting weekly sessions XML:", error);
             console.error("Error stack:", error.stack);
@@ -420,6 +418,10 @@ export class APISessionController {
 ]>`;
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) ${new Date().getFullYear()} High Street Gym.
+    All rights reserved.
+-->
 ${dtd}
 <weekly_sessions>
     <header>
@@ -472,37 +474,6 @@ ${dtd}
         </session>`;
         };
 
-        const getWeekRange = (dateString) => {
-            if (!dateString) return null;
-            const date = new Date(`${dateString}T00:00:00`);
-            if (isNaN(date.getTime())) return null;
-            const day = date.getDay(); // 0 (Sun) - 6 (Sat)
-            const diffToMonday = day === 0 ? -6 : 1 - day; // Monday as first day
-            const monday = new Date(date);
-            monday.setDate(date.getDate() + diffToMonday);
-            const sunday = new Date(monday);
-            sunday.setDate(monday.getDate() + 6);
-
-            const formatISODate = (d) => {
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const dayNum = String(d.getDate()).padStart(2, '0');
-                return `${year}-${month}-${dayNum}`;
-            };
-            const formatDisplayDate = (d) => {
-                const dayNum = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-                return `${dayNum}/${month}/${year}`;
-            };
-
-            return {
-                key: `${formatISODate(monday)}_${formatISODate(sunday)}`,
-                startISO: formatISODate(monday),
-                endISO: formatISODate(sunday),
-                label: `${formatDisplayDate(monday)} - ${formatDisplayDate(sunday)}`
-            };
-        };
 
         const weekGroups = new Map();
         sessions.forEach(sessionItem => {

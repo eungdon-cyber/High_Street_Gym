@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2025 High Street Gym.
+    All rights reserved.
+-->
+<!DOCTYPE booking_history [
+    <!ELEMENT booking_history (header, week*)>
+    <!ELEMENT header (title, exported_at, total_bookings, period, member)>
+    <!ELEMENT title (#PCDATA)>
+    <!ELEMENT exported_at (#PCDATA)>
+    <!ELEMENT total_bookings (#PCDATA)>
+    <!ELEMENT period (start, end)>
+    <!ELEMENT start (#PCDATA)>
+    <!ELEMENT end (#PCDATA)>
+    <!ELEMENT member (name, email, id)>
+    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT email (#PCDATA)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT week (booking*)>
+    <!ATTLIST week start CDATA #IMPLIED>
+    <!ATTLIST week end CDATA #IMPLIED>
+    <!ATTLIST week period_label CDATA #IMPLIED>
+    <!ELEMENT booking (booking_date, booking_time, datetime, activity, location, trainer, booking_id, session_id)>
+    <!ELEMENT booking_date (#PCDATA)>
+    <!ELEMENT booking_time (#PCDATA)>
+    <!ELEMENT datetime (#PCDATA)>
+    <!ELEMENT activity (name, description, id)>
+    <!ELEMENT description (#PCDATA)>
+    <!ELEMENT location (name, address, id)>
+    <!ELEMENT address (#PCDATA)>
+    <!ELEMENT trainer (name, email, id)>
+    <!ELEMENT booking_id (#PCDATA)>
+    <!ELEMENT session_id (#PCDATA)>
+]>
+<booking_history>
+    <header>
+        <title>Booking History - Olivia Martinez</title>
+        <exported_at>2025-12-04 10:35:25</exported_at>
+        <total_bookings>8</total_bookings>
+        <period>
+            <start>2025-10-13</start>
+            <end>2025-12-07</end>
+        </period>
+        <member>
+            <name>Olivia Martinez</name>
+            <email>member1@hsg.com</email>
+            <id>8</id>
+        </member>
+    </header>
+    <week start="2025-10-13" end="2025-10-19" period_label="13/10/2025 - 19/10/2025">
+
+        <booking>
+            <booking_date>2025-10-15</booking_date>
+            <booking_time>07:00:00</booking_time>
+            <datetime>2025-10-15T07:00:00</datetime>
+            <activity>
+                <name>Boxing</name>
+                <description>Punching, Ducking and Bleeding !!!</description>
+                <id>19</id>
+            </activity>
+            <location>
+                <name>Toowong Gym</name>
+                <address>123 Queen street, Toowong, Brisbane</address>
+                <id>20</id>
+            </location>
+            <trainer>
+                <name>Robert Anderson</name>
+                <email>trainer5@hsg.com</email>
+                <id>7</id>
+            </trainer>
+            <booking_id>booking_110</booking_id>
+            <session_id>session_124</session_id>
+        </booking>
+    </week>
+    <week start="2025-11-03" end="2025-11-09" period_label="03/11/2025 - 09/11/2025">
+
+        <booking>
+            <booking_date>2025-11-03</booking_date>
+            <booking_time>10:46:00</booking_time>
+            <datetime>2025-11-03T10:46:00</datetime>
+            <activity>
+                <name>Activity-1007</name>
+                <description>Description-1007-update</description>
+                <id>26</id>
+            </activity>
+            <location>
+                <name>Downtown Gym</name>
+                <address>123 Main St, Brisbane, QLD</address>
+                <id>1</id>
+            </location>
+            <trainer>
+                <name>Mike Tyson</name>
+                <email>mike@hsg.com</email>
+                <id>73</id>
+            </trainer>
+            <booking_id>booking_144</booking_id>
+            <session_id>session_133</session_id>
+        </booking>
+    </week>
+    <week start="2025-11-10" end="2025-11-16" period_label="10/11/2025 - 16/11/2025">
+
+        <booking>
+            <booking_date>2025-11-14</booking_date>
+            <booking_time>18:00:00</booking_time>
+            <datetime>2025-11-14T18:00:00</datetime>
+            <activity>
+                <name>Activity-1007</name>
+                <description>Description-1007-update</description>
+                <id>26</id>
+            </activity>
+            <location>
+                <name>Flex Gym</name>
+                <address>555 Flex Ave, Woolloongabba, QLD</address>
+                <id>8</id>
+            </location>
+            <trainer>
+                <name>Emma Taylor</name>
+                <email>trainer4@hsg.com</email>
+                <id>6</id>
+            </trainer>
+            <booking_id>booking_146</booking_id>
+            <session_id>session_145</session_id>
+        </booking>
+        <booking>
+            <booking_date>2025-11-15</booking_date>
+            <booking_time>18:00:00</booking_time>
+            <datetime>2025-11-15T18:00:00</datetime>
+            <activity>
+                <name>CrossFit</name>
+                <description>Functional movements at high intensity.</description>
+                <id>6</id>
+            </activity>
+            <location>
+                <name>Eastside Gym</name>
+                <address>789 East St, Morningside, QLD</address>
+                <id>3</id>
+            </location>
+            <trainer>
+                <name>Michael Brown</name>
+                <email>trainer1@hsg.com</email>
+                <id>3</id>
+            </trainer>
+            <booking_id>booking_98</booking_id>
+            <session_id>session_96</session_id>
+        </booking>
+    </week>
+    <week start="2025-11-17" end="2025-11-23" period_label="17/11/2025 - 23/11/2025">
+
+        <booking>
+            <booking_date>2025-11-20</booking_date>
+            <booking_time>09:30:00</booking_time>
+            <datetime>2025-11-20T09:30:00</datetime>
+            <activity>
+                <name>Calisthenics</name>
+                <description>Strength training with body weight.</description>
+                <id>10</id>
+            </activity>
+            <location>
+                <name>Victory Gym</name>
+                <address>777 Victory Dr, Toowong, QLD</address>
+                <id>10</id>
+            </location>
+            <trainer>
+                <name>Robert Anderson</name>
+                <email>trainer5@hsg.com</email>
+                <id>7</id>
+            </trainer>
+            <booking_id>booking_153</booking_id>
+            <session_id>session_60</session_id>
+        </booking>
+    </week>
+    <week start="2025-12-01" end="2025-12-07" period_label="01/12/2025 - 07/12/2025">
+
+        <booking>
+            <booking_date>2025-12-01</booking_date>
+            <booking_time>09:00:00</booking_time>
+            <datetime>2025-12-01T09:00:00</datetime>
+            <activity>
+                <name>Boxing</name>
+                <description>Punching, Ducking and Bleeding !!!</description>
+                <id>19</id>
+            </activity>
+            <location>
+                <name>Power Gym</name>
+                <address>444 Power Ln, Southbank, QLD</address>
+                <id>7</id>
+            </location>
+            <trainer>
+                <name>Emma Taylor</name>
+                <email>trainer4@hsg.com</email>
+                <id>6</id>
+            </trainer>
+            <booking_id>booking_154</booking_id>
+            <session_id>session_149</session_id>
+        </booking>
+        <booking>
+            <booking_date>2025-12-01</booking_date>
+            <booking_time>10:00:00</booking_time>
+            <datetime>2025-12-01T10:00:00</datetime>
+            <activity>
+                <name>Pilates</name>
+                <description>A relaxing yet powerful workout</description>
+                <id>1</id>
+            </activity>
+            <location>
+                <name>Downtown Gym</name>
+                <address>123 Main St, Brisbane, QLD</address>
+                <id>1</id>
+            </location>
+            <trainer>
+                <name>Michael Brown</name>
+                <email>trainer1@hsg.com</email>
+                <id>3</id>
+            </trainer>
+            <booking_id>booking_157</booking_id>
+            <session_id>session_148</session_id>
+        </booking>
+        <booking>
+            <booking_date>2025-12-01</booking_date>
+            <booking_time>15:00:00</booking_time>
+            <datetime>2025-12-01T15:00:00</datetime>
+            <activity>
+                <name>Boxing</name>
+                <description>Punching, Ducking and Bleeding !!!</description>
+                <id>19</id>
+            </activity>
+            <location>
+                <name>Flex Gym</name>
+                <address>555 Flex Ave, Woolloongabba, QLD</address>
+                <id>8</id>
+            </location>
+            <trainer>
+                <name>Michael Brown</name>
+                <email>trainer1@hsg.com</email>
+                <id>3</id>
+            </trainer>
+            <booking_id>booking_155</booking_id>
+            <session_id>session_151</session_id>
+        </booking>
+    </week>
+</booking_history>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2025 High Street Gym.
+    All rights reserved.
+-->
+<!DOCTYPE weekly_sessions [
+    <!ELEMENT weekly_sessions (header, week*)>
+    <!ELEMENT header (title, exported_at, total_sessions, period, trainer)>
+    <!ELEMENT title (#PCDATA)>
+    <!ELEMENT exported_at (#PCDATA)>
+    <!ELEMENT total_sessions (#PCDATA)>
+    <!ELEMENT period (start, end)>
+    <!ELEMENT start (#PCDATA)>
+    <!ELEMENT end (#PCDATA)>
+    <!ELEMENT trainer (name, email, id)>
+    <!ELEMENT name (#PCDATA)>
+    <!ELEMENT email (#PCDATA)>
+    <!ELEMENT id (#PCDATA)>
+    <!ELEMENT week (session*)>
+    <!ATTLIST week start CDATA #IMPLIED>
+    <!ATTLIST week end CDATA #IMPLIED>
+    <!ATTLIST week label CDATA #IMPLIED>
+    <!ELEMENT session (session_date, session_time, datetime, id, activity, location)>
+    <!ELEMENT session_date (#PCDATA)>
+    <!ELEMENT session_time (#PCDATA)>
+    <!ELEMENT datetime (#PCDATA)>
+    <!ELEMENT activity (name, description, id)>
+    <!ELEMENT description (#PCDATA)>
+    <!ELEMENT location (name, address, id)>
+    <!ELEMENT address (#PCDATA)>
+]>
+<weekly_sessions>
+    <header>
+        <title>Sessions - Sarah Johnson</title>
+        <exported_at>2025-12-04 10:35:05</exported_at>
+        <total_sessions>3</total_sessions>
+        <period>
+            <start>2025-12-15</start>
+            <end>2025-12-28</end>
+        </period>
+        <trainer>
+            <name>Sarah Johnson</name>
+            <email>trainer2@hsg.com</email>
+            <id>4</id>
+        </trainer>
+    </header>
+    <week start="2025-12-15" end="2025-12-21" label="15/12/2025 - 21/12/2025">
+
+        <session>
+            <session_date>2025-12-17</session_date>
+            <session_time>12:00:00</session_time>
+            <datetime>2025-12-17T12:00:00</datetime>
+            <id>session_57</id>
+            <activity>
+                <name>Spinning</name>
+                <description>High-energy indoor cycling class.</description>
+                <id>7</id>
+            </activity>
+            <location>
+                <name>Power Gym</name>
+                <address>444 Power Ln, Southbank, QLD</address>
+                <id>7</id>
+            </location>
+        </session>
+    </week>
+    <week start="2025-12-22" end="2025-12-28" label="22/12/2025 - 28/12/2025">
+
+        <session>
+            <session_date>2025-12-22</session_date>
+            <session_time>11:30:00</session_time>
+            <datetime>2025-12-22T11:30:00</datetime>
+            <id>session_62</id>
+            <activity>
+                <name>HIIT</name>
+                <description>High-Intensity Interval Training.</description>
+                <id>2</id>
+            </activity>
+            <location>
+                <name>Westside Gym</name>
+                <address>456 West Ave, Ashgrove, QLD</address>
+                <id>2</id>
+            </location>
+        </session>
+        <session>
+            <session_date>2025-12-27</session_date>
+            <session_time>10:00:00</session_time>
+            <datetime>2025-12-27T10:00:00</datetime>
+            <id>session_67</id>
+            <activity>
+                <name>Spinning</name>
+                <description>High-energy indoor cycling class.</description>
+                <id>7</id>
+            </activity>
+            <location>
+                <name>Power Gym</name>
+                <address>444 Power Ln, Southbank, QLD</address>
+                <id>7</id>
+            </location>
+        </session>
+    </week>
+</weekly_sessions>

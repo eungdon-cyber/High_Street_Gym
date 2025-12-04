@@ -4,6 +4,7 @@ import { SessionModel } from "../../models/SessionModel.mjs";
 import { BookingSessionActivityLocationUserModel } from "../../models/BookingSessionActivityLocationUserModel.mjs";
 import { BookingController } from "../BookingController.mjs";
 import { APIAuthenticationController } from "./APIAuthenticationController.mjs";
+import { exportXML, getWeekRange } from "../../utils/xmlExport.mjs";
 
 export class APIBookingController {
     static routes = express.Router();
@@ -420,11 +421,8 @@ export class APIBookingController {
             const memberName = `${req.authenticatedUser.firstName}-${req.authenticatedUser.lastName}`.replace(/\s+/g, '-');
             const filename = `booking-history-${memberName}.xml`;
 
-            // Set response headers for XML download
-            res.setHeader('Content-Type', 'application/xml');
-            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-            
-            res.send(xmlContent);
+            // Export XML with backup
+            exportXML(res, xmlContent, filename);
         } catch (error) {
             console.error("Error exporting booking history XML:", error);
             console.error("Error stack:", error.stack);
@@ -497,39 +495,6 @@ export class APIBookingController {
             return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
         };
 
-        // Helper function to get week range for a date (Monday to Sunday)
-        const getWeekRange = (dateString) => {
-            if (!dateString) return null;
-            const date = new Date(`${dateString}T00:00:00`);
-            if (isNaN(date.getTime())) return null;
-            const day = date.getDay(); // 0 (Sun) - 6 (Sat)
-            const diffToMonday = day === 0 ? -6 : 1 - day; // Monday as first day
-            const monday = new Date(date);
-            monday.setDate(date.getDate() + diffToMonday);
-            const sunday = new Date(monday);
-            sunday.setDate(monday.getDate() + 6);
-
-            const formatISODate = (d) => {
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const dayNum = String(d.getDate()).padStart(2, '0');
-                return `${year}-${month}-${dayNum}`;
-            };
-            const formatDisplayDate = (d) => {
-                const dayNum = String(d.getDate()).padStart(2, '0');
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const year = d.getFullYear();
-                return `${dayNum}/${month}/${year}`;
-            };
-
-            return {
-                key: `${formatISODate(monday)}_${formatISODate(sunday)}`,
-                startISO: formatISODate(monday),
-                endISO: formatISODate(sunday),
-                label: `${formatDisplayDate(monday)} - ${formatDisplayDate(sunday)}`
-            };
-        };
-
         // Group bookings by week
         const weekGroups = new Map();
         bookings.forEach(bookingItem => {
@@ -562,6 +527,10 @@ export class APIBookingController {
         }
 
         let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) ${new Date().getFullYear()} High Street Gym.
+    All rights reserved.
+-->
 ${dtd}
 <booking_history>
     <header>

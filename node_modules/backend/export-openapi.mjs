@@ -55,8 +55,8 @@ const options = {
 // Generate the OpenAPI specification
 const specifications = swaggerJsdoc(options);
 
-// Ensure doc directory exists for outputs
-const docDir = path.join(__dirname, "doc");
+// Ensure docs directory exists for outputs
+const docDir = path.join(__dirname, "docs");
 if (!fs.existsSync(docDir)) {
     fs.mkdirSync(docDir, { recursive: true });
 }
