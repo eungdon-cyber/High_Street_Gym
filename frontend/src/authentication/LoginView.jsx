@@ -127,6 +127,18 @@ function LoginView() {
                         <span>{status}</span>
                     </div>
                 )}
+                
+                {/* Privacy Policy link: links to Australian Privacy Principles */}
+                <div className="mt-8 text-center">
+                    <a 
+                        href="https://www.oaic.gov.au/privacy/australian-privacy-principles" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-block bg-white/10 hover:bg-white/20 border-2 border-[#30d939] text-[#30d939] font-semibold px-6 py-3 rounded-full text-base transition-all duration-300 hover:shadow-lg hover:shadow-[#30d939]/50 hover:-translate-y-0.5"
+                    >
+                        Privacy Policy (Australian Privacy Principles - Privacy Act 1988 (Cth))
+                    </a>
+                </div>
             </div>
         </section>
     )
