@@ -4,7 +4,7 @@ import { SessionModel } from "../../models/SessionModel.mjs";
 import { BookingSessionActivityLocationUserModel } from "../../models/BookingSessionActivityLocationUserModel.mjs";
 import { BookingController } from "../BookingController.mjs";
 import { APIAuthenticationController } from "./APIAuthenticationController.mjs";
-import { exportXML, getWeekRange } from "../../utils/xmlExport.mjs";
+import { exportXML, getWeekRange, escapeXML, formatLocalDateTime, generateWeeklyXML } from "../../utils/xmlExport.mjs";
 
 export class APIBookingController {
     static routes = express.Router();
@@ -400,20 +400,6 @@ export class APIBookingController {
                 });
             }
 
-            // Sort bookings chronologically by session date and time
-            // Handles missing/invalid dates by placing them at the end
-            bookings.sort((a, b) => {
-                const dateA = new Date(`${a.session?.sessionDate || ''}T${a.session?.sessionTime || ''}`);
-                const dateB = new Date(`${b.session?.sessionDate || ''}T${b.session?.sessionTime || ''}`);
-                
-                // If either date is invalid, handle edge cases
-                if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-                if (isNaN(dateA.getTime())) return 1; // Invalid dates go to end
-                if (isNaN(dateB.getTime())) return -1;
-                
-                return dateA - dateB; // Ascending order (oldest first)
-            });
-
             // Generate XML content
             const xmlContent = APIBookingController.generateBookingsXML(bookings, req.authenticatedUser);
 
@@ -440,16 +426,6 @@ export class APIBookingController {
      * @returns {string} XML content
      */
     static generateBookingsXML(bookings, user) {
-        // Format exported_at timestamp in YYYY-MM-DD HH:mm:ss format (matching sessions format)
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const exportedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
         // DTD definition matching the updated structure from diagram
         const dtd = `<!DOCTYPE booking_history [
     <!ELEMENT booking_history (header, week*)>
@@ -481,73 +457,6 @@ export class APIBookingController {
     <!ELEMENT session_id (#PCDATA)>
 ]>`;
 
-        // Format datetime in ISO 8601 format without milliseconds/timezone
-        const formatLocalDateTime = (date) => {
-            if (!date || isNaN(date.getTime())) {
-                return '';
-            }
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-        };
-
-        // Group bookings by week
-        const weekGroups = new Map();
-        bookings.forEach(bookingItem => {
-            const session = bookingItem.session;
-            if (!session || !session.sessionDate) return;
-            
-            const range = getWeekRange(session.sessionDate);
-            if (!range) return;
-            
-            if (!weekGroups.has(range.key)) {
-                weekGroups.set(range.key, { range, bookings: [] });
-            }
-            weekGroups.get(range.key).bookings.push(bookingItem);
-        });
-
-        // Sort week entries chronologically
-        const weekEntries = Array.from(weekGroups.values()).sort((a, b) => {
-            if (a.range.startISO === b.range.startISO) {
-                return a.range.endISO.localeCompare(b.range.endISO);
-            }
-            return a.range.startISO.localeCompare(b.range.startISO);
-        });
-
-        // Calculate period start/end from first week's start and last week's end
-        let periodStart = 'No bookings available';
-        let periodEnd = 'No bookings available';
-        if (weekEntries.length > 0) {
-            periodStart = weekEntries[0].range.startISO;
-            periodEnd = weekEntries[weekEntries.length - 1].range.endISO;
-        }
-
-        let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Copyright (c) ${new Date().getFullYear()} High Street Gym.
-    All rights reserved.
--->
-${dtd}
-<booking_history>
-    <header>
-        <title>Booking History - ${user.firstName} ${user.lastName}</title>
-        <exported_at>${exportedAt}</exported_at>
-        <total_bookings>${bookings.length}</total_bookings>
-        <period>
-            <start>${periodStart}</start>
-            <end>${periodEnd}</end>
-        </period>
-        <member>
-            <name>${user.firstName} ${user.lastName}</name>
-            <email>${user.email}</email>
-            <id>${user.id}</id>
-        </member>
-    </header>`;
-
         // Render a single booking
         const renderBooking = (bookingItem) => {
             const booking = bookingItem.booking;
@@ -572,18 +481,18 @@ ${dtd}
             <booking_time>${session.sessionTime || 'N/A'}</booking_time>
             <datetime>${formatLocalDateTime(sessionDateTime)}</datetime>
             <activity>
-                <name>${APIBookingController.escapeXML(activity.name || 'Unknown Activity')}</name>
-                <description>${APIBookingController.escapeXML(activity.description || '')}</description>
+                <name>${escapeXML(activity.name || 'Unknown Activity')}</name>
+                <description>${escapeXML(activity.description || '')}</description>
                 <id>${activity.id}</id>
             </activity>
             <location>
-                <name>${APIBookingController.escapeXML(location.name || 'Unknown Location')}</name>
-                <address>${APIBookingController.escapeXML(location.address || '')}</address>
+                <name>${escapeXML(location.name || 'Unknown Location')}</name>
+                <address>${escapeXML(location.address || '')}</address>
                 <id>${location.id}</id>
             </location>
             <trainer>
-                <name>${APIBookingController.escapeXML(trainer.firstName || '')} ${APIBookingController.escapeXML(trainer.lastName || '')}</name>
-                <email>${APIBookingController.escapeXML(trainer.email || '')}</email>
+                <name>${escapeXML(trainer.firstName || '')} ${escapeXML(trainer.lastName || '')}</name>
+                <email>${escapeXML(trainer.email || '')}</email>
                 <id>${trainer.id}</id>
             </trainer>
             <booking_id>${bookingId}</booking_id>
@@ -591,44 +500,19 @@ ${dtd}
         </booking>`;
         };
 
-        // Add week elements with bookings
-        if (weekEntries.length > 0) {
-            weekEntries.forEach(({ range, bookings: bookingsInWeek }) => {
-                // Sort bookings within week by date and time
-                bookingsInWeek.sort((a, b) => {
-                    const dateA = new Date(`${a.session?.sessionDate || ''}T${a.session?.sessionTime || ''}`);
-                    const dateB = new Date(`${b.session?.sessionDate || ''}T${b.session?.sessionTime || ''}`);
-                    if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
-                    if (isNaN(dateA.getTime())) return 1;
-                    if (isNaN(dateB.getTime())) return -1;
-                    return dateA - dateB;
-                });
-
-                xml += `
-    <week start="${range.startISO}" end="${range.endISO}" period_label="${range.label}">
-${bookingsInWeek.map(renderBooking).join("")}
-    </week>`;
-            });
-        }
-
-        xml += `
-</booking_history>`;
-
-        return xml;
+        return generateWeeklyXML({
+            rootElement: 'booking_history',
+            dtd,
+            titlePrefix: 'Booking History',
+            countElement: 'total_bookings',
+            entityElement: 'member',
+            itemElement: 'booking',
+            weekItemKey: 'bookings',
+            weekAttributeName: 'period_label',
+            emptyMessage: 'No bookings available',
+            getItemDate: (item) => item.session?.sessionDate,
+            renderItem: renderBooking
+        }, bookings, user);
     }
 
-    /**
-     * Escape special characters for XML
-     * @param {string} text - Text to escape
-     * @returns {string} Escaped text
-     */
-    static escapeXML(text) {
-        if (!text) return '';
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
-    }
 }   

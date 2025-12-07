@@ -4,7 +4,7 @@ import { SessionActivityLocationUserModel } from "../../models/SessionActivityLo
 import { UserModel } from "../../models/UserModel.mjs";
 import { SessionController } from "../SessionController.mjs";
 import { APIAuthenticationController } from "./APIAuthenticationController.mjs";
-import { exportXML, getWeekRange } from "../../utils/xmlExport.mjs";
+import { exportXML, getWeekRange, escapeXML, formatLocalDateTime, generateWeeklyXML } from "../../utils/xmlExport.mjs";
 
 export class APISessionController {
     static routes = express.Router();
@@ -379,16 +379,6 @@ export class APISessionController {
      * @returns {string} XML content
      */
     static generateSessionsXML(sessions, trainer, startDate, endDate) {
-        // Format exported_at timestamp in YYYY-MM-DD HH:mm:ss format
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const exportedAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-
         // DTD definition matching the updated structure from diagram
         const dtd = `<!DOCTYPE weekly_sessions [
     <!ELEMENT weekly_sessions (header, week*)>
@@ -417,31 +407,7 @@ export class APISessionController {
     <!ELEMENT address (#PCDATA)>
 ]>`;
 
-        let xml = `<?xml version="1.0" encoding="UTF-8"?>
-<!--
-    Copyright (c) ${new Date().getFullYear()} High Street Gym.
-    All rights reserved.
--->
-${dtd}
-<weekly_sessions>
-    <header>
-        <title>Sessions - ${trainer.firstName} ${trainer.lastName}</title>
-        <exported_at>${exportedAt}</exported_at>
-        <total_sessions>${sessions.length}</total_sessions>`;
-
-        const formatLocalDateTime = (date) => {
-            if (!date || isNaN(date.getTime())) {
-                return '';
-            }
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            const seconds = String(date.getSeconds()).padStart(2, '0');
-            return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-        };
-
+        // Render a single session
         const renderSession = (sessionItem) => {
             const session = sessionItem.session;
             const activity = sessionItem.activity;
@@ -462,85 +428,31 @@ ${dtd}
             <datetime>${formatLocalDateTime(sessionDateTime)}</datetime>
             <id>${eventId}</id>
             <activity>
-                <name>${APISessionController.escapeXML(activity.name || 'Unknown Activity')}</name>
-                <description>${APISessionController.escapeXML(activity.description || '')}</description>
+                <name>${escapeXML(activity.name || 'Unknown Activity')}</name>
+                <description>${escapeXML(activity.description || '')}</description>
                 <id>${activity.id}</id>
             </activity>
             <location>
-                <name>${APISessionController.escapeXML(location.name || 'Unknown Location')}</name>
-                <address>${APISessionController.escapeXML(location.address || '')}</address>
+                <name>${escapeXML(location.name || 'Unknown Location')}</name>
+                <address>${escapeXML(location.address || '')}</address>
                 <id>${location.id}</id>
             </location>
         </session>`;
         };
 
-
-        const weekGroups = new Map();
-        sessions.forEach(sessionItem => {
-            const range = getWeekRange(sessionItem.session?.sessionDate);
-            if (!range) return;
-            if (!weekGroups.has(range.key)) {
-                weekGroups.set(range.key, { range, sessions: [] });
-            }
-            weekGroups.get(range.key).sessions.push(sessionItem);
-        });
-
-        const weekEntries = Array.from(weekGroups.values()).sort((a, b) => {
-            if (a.range.startISO === b.range.startISO) {
-                return a.range.endISO.localeCompare(b.range.endISO);
-            }
-            return a.range.startISO.localeCompare(b.range.startISO);
-        });
-
-        // Calculate period start/end from first week's start and last week's end
-        let periodStart = 'No sessions available';
-        let periodEnd = 'No sessions available';
-        if (weekEntries.length > 0) {
-            periodStart = weekEntries[0].range.startISO; // First week's start date
-            periodEnd = weekEntries[weekEntries.length - 1].range.endISO; // Last week's end date
-        }
-
-        // Add period to header
-        xml += `
-        <period>
-            <start>${periodStart}</start>
-            <end>${periodEnd}</end>
-        </period>
-        <trainer>
-            <name>${trainer.firstName} ${trainer.lastName}</name>
-            <email>${trainer.email}</email>
-            <id>${trainer.id}</id>
-        </trainer>
-    </header>`;
-
-        // Add week elements directly under weekly_sessions (matching DTD structure)
-        if (weekEntries.length > 0) {
-            weekEntries.forEach(({ range, sessions: sessionsInWeek }) => {
-                xml += `
-    <week start="${range.startISO}" end="${range.endISO}" label="${range.label}">
-${sessionsInWeek.map(renderSession).join("")}
-    </week>`;
-            });
-        }
-
-        xml += `
-</weekly_sessions>`;
-
-        return xml;
+        return generateWeeklyXML({
+            rootElement: 'weekly_sessions',
+            dtd,
+            titlePrefix: 'Sessions',
+            countElement: 'total_sessions',
+            entityElement: 'trainer',
+            itemElement: 'session',
+            weekItemKey: 'sessions',
+            weekAttributeName: 'label',
+            emptyMessage: 'No sessions available',
+            getItemDate: (item) => item.session?.sessionDate,
+            renderItem: renderSession
+        }, sessions, trainer);
     }
 
-    /**
-     * Escape special characters for XML
-     * @param {string} text - Text to escape
-     * @returns {string} Escaped text
-     */
-    static escapeXML(text) {
-        if (!text) return '';
-        return text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
-    }
 }

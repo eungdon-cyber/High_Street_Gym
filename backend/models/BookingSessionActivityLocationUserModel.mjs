@@ -117,6 +117,7 @@ export class BookingSessionActivityLocationUserModel extends DatabaseModel {
             INNER JOIN users ON bookings.member_id = users.id
             INNER JOIN users as trainers ON sessions.trainer_id = trainers.id
             WHERE bookings.member_id = ? AND bookings.deleted = 0
+            ORDER BY sessions.session_date ASC, sessions.session_time ASC
         `, [userId]).then(result => result.map(row => this.tableToModel(row)));
     }
 
