@@ -3,13 +3,14 @@ import { FaSearch, FaInfoCircle, FaTrash, FaDownload } from "react-icons/fa"
 // API utilities for backend communication
 import { fetchAPI, API_BASE_URL } from "../services/api.mjs"
 // React Router hooks for navigation and URL params
-import { useNavigate, useSearchParams } from "react-router"
+import { useNavigate, useSearchParams, useLocation } from "react-router"
 // Authentication hook for user context
 import { useAuthenticate } from "../authentication/useAuthenticate.jsx"
 
 function SessionListView() {
     const { user } = useAuthenticate()
     const [searchParams, setSearchParams] = useSearchParams()
+    const location = useLocation()
     const [sessions, setSessions] = useState([])
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -54,6 +55,23 @@ function SessionListView() {
         setSelectedSessionGroup([])
         setSelectedSessionGroupMeta(null)
     }, [showMySessions])
+
+    // Clears selected session when reset state is received from navigation (e.g., clicking Sessions icon)
+    useEffect(() => {
+        if (location.state?.reset) {
+            setSelectedSession(null)
+            setSelectedSessionError(null)
+            setBookingSelectedSession(false)
+            setBookingSelectedSessionError(null)
+            setCancelingSelectedSession(false)
+            setCancelSelectedSessionError(null)
+            setShowCancelModal(false)
+            setSelectedSessionGroup([])
+            setSelectedSessionGroupMeta(null)
+            // Clear the reset state to prevent repeated clearing
+            navigate(location.pathname, { state: {}, replace: true })
+        }
+    }, [location.state, navigate])
 
     // Fetches sessions list from backend API
     // Endpoint varies by showMySessions: "/sessions/self" for trainers/admins, "/sessions" for all

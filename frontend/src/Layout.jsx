@@ -106,7 +106,14 @@ function Layout() {
             <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] flex justify-around items-center bg-[#30d939] border-t-2 border-black px-5 py-2.5 z-[100]">
                 {/* Sessions button: navigates to sessions list page */}
                 <button
-                    onClick={() => navigate("/")}
+                    onClick={() => {
+                        if (location.pathname === "/") {
+                            // If already on sessions page, navigate with reset state to clear session details
+                            navigate("/", { state: { reset: true }, replace: true });
+                        } else {
+                            navigate("/");
+                        }
+                    }}
                     className={`${dockButtonBase} ${location.pathname === "/" ? dockButtonActive : ""}`}
                 >
                     <FaDumbbell className={dockIconClass} />
