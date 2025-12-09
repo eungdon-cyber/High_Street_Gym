@@ -34,15 +34,15 @@
 ]>
 <booking_history>
     <header>
-        <title>Booking History - Olivia Martinez</title>
-        <exported_at>2025-12-08 14:16:00</exported_at>
-        <total_bookings>8</total_bookings>
+        <title>Booking History - Olivia PatchtName</title>
+        <exported_at>2025-12-09 13:24:33</exported_at>
+        <total_bookings>15</total_bookings>
         <period>
             <start>2025-10-13</start>
-            <end>2025-12-07</end>
+            <end>2026-01-04</end>
         </period>
         <member>
-            <name>Olivia Martinez</name>
+            <name>Olivia PatchtName</name>
             <email>member1@hsg.com</email>
             <id>8</id>
         </member>
@@ -236,6 +236,169 @@
             </trainer>
             <booking_id>booking_155</booking_id>
             <session_id>session_151</session_id>
+        </booking>
+    </week>
+    <week start="2025-12-15" end="2025-12-21" period_label="15/12/2025 - 21/12/2025">
+
+        <booking>
+            <booking_date>2025-12-15</booking_date>
+            <booking_time>10:30:00</booking_time>
+            <datetime>2025-12-15T10:30:00</datetime>
+            <activity>
+                <name>Calisthenics</name>
+                <description>Strength training with body weight.</description>
+                <id>10</id>
+            </activity>
+            <location>
+                <name>South Gym</name>
+                <address>222 South Blvd, Annerley, QLD</address>
+                <id>5</id>
+            </location>
+            <trainer>
+                <name>Michael Brown</name>
+                <email>trainer1@hsg.com</email>
+                <id>3</id>
+            </trainer>
+            <booking_id>booking_158</booking_id>
+            <session_id>session_141</session_id>
+        </booking>
+        <booking>
+            <booking_date>2025-12-17</booking_date>
+            <booking_time>12:00:00</booking_time>
+            <datetime>2025-12-17T12:00:00</datetime>
+            <activity>
+                <name>Spinning</name>
+                <description>High-energy indoor cycling class.</description>
+                <id>7</id>
+            </activity>
+            <location>
+                <name>Power Gym</name>
+                <address>444 Power Ln, Southbank, QLD</address>
+                <id>7</id>
+            </location>
+            <trainer>
+                <name>Sarah Johnson</name>
+                <email>trainer2@hsg.com</email>
+                <id>4</id>
+            </trainer>
+            <booking_id>booking_104</booking_id>
+            <session_id>session_57</session_id>
+        </booking>
+        <booking>
+            <booking_date>2025-12-18</booking_date>
+            <booking_time>13:00:00</booking_time>
+            <datetime>2025-12-18T13:00:00</datetime>
+            <activity>
+                <name>Kickboxing</name>
+                <description>A cardio workout combining martial arts.</description>
+                <id>8</id>
+            </activity>
+            <location>
+                <name>Flex Gym</name>
+                <address>555 Flex Ave, Woolloongabba, QLD</address>
+                <id>8</id>
+            </location>
+            <trainer>
+                <name>David Williams</name>
+                <email>trainer3@hsg.com</email>
+                <id>5</id>
+            </trainer>
+            <booking_id>booking_129</booking_id>
+            <session_id>session_58</session_id>
+        </booking>
+        <booking>
+            <booking_date>2025-12-19</booking_date>
+            <booking_time>08:30:00</booking_time>
+            <datetime>2025-12-19T08:30:00</datetime>
+            <activity>
+                <name>Extreme Bodybuilding</name>
+                <description>Focus on muscle growth and definition!</description>
+                <id>9</id>
+            </activity>
+            <location>
+                <name>Super Champion Gym</name>
+                <address>777 Champion Rd, New Farm, QLD</address>
+                <id>9</id>
+            </location>
+            <trainer>
+                <name>Emma Taylor</name>
+                <email>trainer4@hsg.com</email>
+                <id>6</id>
+            </trainer>
+            <booking_id>booking_128</booking_id>
+            <session_id>session_59</session_id>
+        </booking>
+    </week>
+    <week start="2025-12-22" end="2025-12-28" period_label="22/12/2025 - 28/12/2025">
+
+        <booking>
+            <booking_date>2025-12-23</booking_date>
+            <booking_time>12:30:00</booking_time>
+            <datetime>2025-12-23T12:30:00</datetime>
+            <activity>
+                <name>Strength Training</name>
+                <description>Improve your strength and endurance.</description>
+                <id>3</id>
+            </activity>
+            <location>
+                <name>Eastside Gym</name>
+                <address>789 East St, Morningside, QLD</address>
+                <id>3</id>
+            </location>
+            <trainer>
+                <name>David Williams</name>
+                <email>trainer3@hsg.com</email>
+                <id>5</id>
+            </trainer>
+            <booking_id>booking_105</booking_id>
+            <session_id>session_63</session_id>
+        </booking>
+        <booking>
+            <booking_date>2025-12-27</booking_date>
+            <booking_time>10:00:00</booking_time>
+            <datetime>2025-12-27T10:00:00</datetime>
+            <activity>
+                <name>Spinning</name>
+                <description>High-energy indoor cycling class.</description>
+                <id>7</id>
+            </activity>
+            <location>
+                <name>Power Gym</name>
+                <address>444 Power Ln, Southbank, QLD</address>
+                <id>7</id>
+            </location>
+            <trainer>
+                <name>Sarah Johnson</name>
+                <email>trainer2@hsg.com</email>
+                <id>4</id>
+            </trainer>
+            <booking_id>booking_97</booking_id>
+            <session_id>session_67</session_id>
+        </booking>
+    </week>
+    <week start="2025-12-29" end="2026-01-04" period_label="29/12/2025 - 04/01/2026">
+
+        <booking>
+            <booking_date>2025-12-29</booking_date>
+            <booking_time>12:00:00</booking_time>
+            <datetime>2025-12-29T12:00:00</datetime>
+            <activity>
+                <name>Extreme Bodybuilding</name>
+                <description>Focus on muscle growth and definition!</description>
+                <id>9</id>
+            </activity>
+            <location>
+                <name>Super Champion Gym</name>
+                <address>777 Champion Rd, New Farm, QLD</address>
+                <id>9</id>
+            </location>
+            <trainer>
+                <name>Emma Taylor</name>
+                <email>trainer4@hsg.com</email>
+                <id>6</id>
+            </trainer>
+            <booking_id>booking_101</booking_id>
+            <session_id>session_69</session_id>
         </booking>
     </week>
 </booking_history>
