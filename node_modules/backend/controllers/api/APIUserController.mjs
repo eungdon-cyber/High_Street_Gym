@@ -117,16 +117,23 @@ export class APIUserController {
      *         $ref: '#/components/responses/InternalServerError'
      */
     static async getAuthenticatedUser(req, res) {
-        // Return safe user fields, including ID for frontend use
-        // Note: ID exposure is acceptable here since user is authenticated and viewing their own data
-        const safeUser = {
-            id: req.authenticatedUser.id,
-            email: req.authenticatedUser.email,
-            firstName: req.authenticatedUser.firstName,
-            lastName: req.authenticatedUser.lastName,
-            role: req.authenticatedUser.role
-        };
-        res.status(200).json(safeUser);
+        try {
+            // Return safe user fields, including ID for frontend use
+            // Note: ID exposure is acceptable here since user is authenticated and viewing their own data
+            const safeUser = {
+                id: req.authenticatedUser.id,
+                email: req.authenticatedUser.email,
+                firstName: req.authenticatedUser.firstName,
+                lastName: req.authenticatedUser.lastName,
+                role: req.authenticatedUser.role
+            };
+            res.status(200).json(safeUser);
+        } catch (error) {
+            console.error("Error fetching authenticated user:", error);
+            res.status(500).json({
+                message: "Failed to retrieve user"
+            });
+        }
     }
 
     /**

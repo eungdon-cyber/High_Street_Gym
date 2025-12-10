@@ -537,6 +537,9 @@ components:
             updateUserError:
               value:
                 message: Failed to update user details
+            retrieveUserError:
+              value:
+                message: Failed to retrieve user
             createBookingError:
               value:
                 message: Failed to create booking
