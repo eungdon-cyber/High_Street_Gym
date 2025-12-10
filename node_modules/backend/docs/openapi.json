@@ -84,8 +84,8 @@
         "properties": {
           "message": {
             "type": "string",
-            "description": "Error message",
-            "example": "An error occurred"
+            "description": "Error message describing what went wrong",
+            "example": "Session not found"
           }
         }
       },
@@ -475,6 +475,9 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Blog not found"
             }
           }
         }
@@ -508,6 +511,58 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "missingLoginFields": {
+                "value": {
+                  "message": "Email and password are required"
+                }
+              },
+              "missingRegistrationFields": {
+                "value": {
+                  "message": "Email, password, first name, and last name are required"
+                }
+              },
+              "missingSessionId": {
+                "value": {
+                  "message": "sessionId is required"
+                }
+              },
+              "missingBlogFields": {
+                "value": {
+                  "message": "Title and content are required"
+                }
+              },
+              "missingSessionFields": {
+                "value": {
+                  "message": "activityId, locationId, sessionDate, and sessionTime are required"
+                }
+              },
+              "invalidCredentials": {
+                "value": {
+                  "message": "Invalid credentials"
+                }
+              },
+              "invalidBookingId": {
+                "value": {
+                  "message": "Invalid booking ID"
+                }
+              },
+              "emailAlreadyExists": {
+                "value": {
+                  "message": "User with this email already exists"
+                }
+              },
+              "updateUserMissingFields": {
+                "value": {
+                  "message": "At least one field (firstName, lastName, or password) must be provided"
+                }
+              },
+              "emailCannotBeChanged": {
+                "value": {
+                  "message": "Email cannot be changed. Please register a new account or contact an administrator."
+                }
+              }
             }
           }
         }
@@ -518,6 +573,51 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "notAuthenticated": {
+                "value": {
+                  "message": "Not authenticated"
+                }
+              },
+              "notAuthenticatedWithErrors": {
+                "value": {
+                  "message": "Not authenticated",
+                  "errors": [
+                    "Please authenticate to access the requested resource."
+                  ]
+                }
+              },
+              "authenticationRequired": {
+                "value": {
+                  "message": "Authentication required"
+                }
+              },
+              "logoutNotAuthenticated": {
+                "value": {
+                  "message": "Not authenticated"
+                }
+              },
+              "bookingNotAuthenticated": {
+                "value": {
+                  "message": "Not authenticated"
+                }
+              },
+              "sessionNotAuthenticated": {
+                "value": {
+                  "message": "Not authenticated"
+                }
+              },
+              "userNotAuthenticated": {
+                "value": {
+                  "message": "Not authenticated"
+                }
+              },
+              "blogCreateNotAuthenticated": {
+                "value": {
+                  "message": "Authentication required"
+                }
+              }
             }
           }
         }
@@ -528,6 +628,33 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "keyNotFound": {
+                "value": {
+                  "message": "Failed to authenticate - key not found"
+                }
+              },
+              "bookingNotFound": {
+                "value": {
+                  "message": "Booking not found"
+                }
+              },
+              "sessionNotFound": {
+                "value": {
+                  "message": "Session not found"
+                }
+              },
+              "blogNotFound": {
+                "value": {
+                  "message": "Blog not found"
+                }
+              },
+              "trainerNotFound": {
+                "value": {
+                  "message": "Trainer not found"
+                }
+              }
             }
           }
         }
@@ -551,6 +678,31 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "roleForbidden": {
+                "value": {
+                  "message": "Access forbidden",
+                  "errors": [
+                    "Role does not have access to the requested resource."
+                  ]
+                }
+              },
+              "bookingAccessForbidden": {
+                "value": {
+                  "message": "Access forbidden - you can only view your own bookings"
+                }
+              },
+              "bookingCancelForbidden": {
+                "value": {
+                  "message": "Access forbidden - you can only cancel your own bookings"
+                }
+              },
+              "sessionOwnershipForbidden": {
+                "value": {
+                  "message": "You can only cancel your own sessions"
+                }
+              }
             }
           }
         }
@@ -561,6 +713,98 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "loginError": {
+                "value": {
+                  "message": "Failed to authenticate user"
+                }
+              },
+              "logoutError": {
+                "value": {
+                  "message": "Failed to logout"
+                }
+              },
+              "registrationError": {
+                "value": {
+                  "message": "Failed to register user"
+                }
+              },
+              "updateUserError": {
+                "value": {
+                  "message": "Failed to update user details"
+                }
+              },
+              "createBookingError": {
+                "value": {
+                  "message": "Failed to create booking"
+                }
+              },
+              "retrieveBookingsError": {
+                "value": {
+                  "message": "Failed to retrieve bookings"
+                }
+              },
+              "loadBookingError": {
+                "value": {
+                  "message": "Failed to load booking"
+                }
+              },
+              "cancelBookingError": {
+                "value": {
+                  "message": "Failed to cancel booking"
+                }
+              },
+              "exportBookingHistoryError": {
+                "value": {
+                  "message": "Failed to export booking history"
+                }
+              },
+              "createSessionError": {
+                "value": {
+                  "message": "Failed to create session"
+                }
+              },
+              "retrieveSessionsError": {
+                "value": {
+                  "message": "Failed to retrieve sessions"
+                }
+              },
+              "cancelSessionError": {
+                "value": {
+                  "message": "Failed to cancel session"
+                }
+              },
+              "exportWeeklySessionsError": {
+                "value": {
+                  "message": "Failed to export weekly sessions"
+                }
+              },
+              "createBlogError": {
+                "value": {
+                  "message": "Failed to create blog"
+                }
+              },
+              "retrieveBlogsError": {
+                "value": {
+                  "message": "Failed to retrieve blogs"
+                }
+              },
+              "retrieveBlogError": {
+                "value": {
+                  "message": "Failed to retrieve blog"
+                }
+              },
+              "deleteBlogError": {
+                "value": {
+                  "message": "Failed to delete blog"
+                }
+              },
+              "databaseError": {
+                "value": {
+                  "message": "Failed to authenticated - database error"
+                }
+              }
             }
           }
         }
@@ -574,8 +818,34 @@
               "properties": {
                 "message": {
                   "type": "string",
-                  "description": "Success message",
-                  "example": "Operation successful"
+                  "description": "Success message"
+                }
+              }
+            },
+            "examples": {
+              "logoutSuccess": {
+                "value": {
+                  "message": "Logout successful"
+                }
+              },
+              "bookingCanceled": {
+                "value": {
+                  "message": "Booking canceled successfully"
+                }
+              },
+              "sessionCanceled": {
+                "value": {
+                  "message": "Session canceled successfully"
+                }
+              },
+              "blogDeleted": {
+                "value": {
+                  "message": "Blog deleted successfully"
+                }
+              },
+              "operationSuccessful": {
+                "value": {
+                  "message": "Operation successful"
                 }
               }
             }
@@ -1362,6 +1632,45 @@
           "Users"
         ],
         "description": "Update personal details (first name, last name, and optionally password) for the authenticated user. Email cannot be changed - users must register a new account or contact an admin. Note: Replace example values with your actual current or new values. Only include fields you want to update (partial updates are supported). IMPORTANT: Ensure valid JSON format - no trailing commas. Examples: {\"firstName\": \"John\"} or {\"firstName\": \"John\", \"lastName\": \"Doe\"}",
+        "security": [
+          {
+            "apiKey": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/UserUpdated"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Partially update current authenticated user details",
+        "tags": [
+          "Users"
+        ],
+        "description": "Partially update personal details (first name, last name, and optionally password) for the authenticated user. Email cannot be changed - users must register a new account or contact an admin. Only include fields you want to update. IMPORTANT: Ensure valid JSON format - no trailing commas. Examples: {\"firstName\": \"John\"} or {\"firstName\": \"John\", \"lastName\": \"Doe\"}",
         "security": [
           {
             "apiKey": []
